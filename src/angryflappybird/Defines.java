@@ -41,11 +41,15 @@ public class Defines {
     final double TRANSITION_TIME = 0.1;
     final int TRANSITION_CYCLE = 2;
     
+    // coefficients related to the pipes
+    final int PIPE_WIDTH = 50;
+    final int PIPE_HEIGHT = 240;
+    final int PIPE_COUNT = 50;
     
     // coefficients related to media display
     final String STAGE_TITLE = "Angry Flappy Bird";
 	private final String IMAGE_DIR = "../resources/images/";
-    final String[] IMAGE_FILES = {"background","blob0", "blob1", "blob2", "blob3", "floor"};
+    final String[] IMAGE_FILES = {"backgroundDay","blob0", "blob1", "blob2", "blob3", "floor", "pipe"};
 
     final HashMap<String, ImageView> IMVIEW = new HashMap<String, ImageView>();
     final HashMap<String, Image> IMAGE = new HashMap<String, Image>();
@@ -78,7 +82,7 @@ public class Defines {
     	}
 		
 		// initialize scene nodes
-		startButton = new Button("Go!");
+		startButton = new Button("Start Game!");
 	}
 	
 	public String pathImage(String filepath) {

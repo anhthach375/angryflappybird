@@ -35,6 +35,7 @@ public class AngryFlappyBird extends Application {
     // game components
     private Sprite blob;
     private ArrayList<Sprite> floors;
+    private ArrayList<Sprite> pipes;
     
     // game flags
     private boolean CLICKED, GAME_START, GAME_OVER;
@@ -106,7 +107,7 @@ public class AngryFlappyBird extends Application {
             gc = canvas.getGraphicsContext2D();
 
             // create a background
-            ImageView background = DEF.IMVIEW.get("background");
+            ImageView background = DEF.IMVIEW.get("backgroundDay");
             
             // create the game scene
             gameScene = new Group();
@@ -134,6 +135,17 @@ public class AngryFlappyBird extends Application {
         startTime = System.nanoTime();
         timer = new MyTimer();
         timer.start();
+        
+        // initialize pipe
+        for(int i=0; i<DEF.FLOOR_COUNT; i++) {
+            
+            int posX = i * DEF.FLOOR_WIDTH;
+            int posY = DEF.SCENE_HEIGHT - DEF.FLOOR_HEIGHT;
+            
+            Sprite pipe = new Sprite(1, 1, DEF.IMAGE.get("pipe"));
+            pipe.setVelocity(DEF.SCENE_SHIFT_INCR, 0);
+            pipe.render(gc);
+        }
     }
 
     //timer stuff
@@ -197,6 +209,20 @@ public class AngryFlappyBird extends Application {
 			blob.update(elapsedTime * DEF.NANOSEC_TO_SEC);
 			blob.render(gc);
     	 }
+    	 
+    	 // step 3: update pipe
+         private void movePipe() {
+            
+            for(int i=0; i<DEF.PIPE_COUNT; i++) {
+                if (pipes.get(i).getPositionX() <= -DEF.PIPE_WIDTH) {
+                    double nextX = pipes.get((i+1)%DEF.PIPE_COUNT).getPositionX() + DEF.PIPE_WIDTH;
+                    double nextY = DEF.SCENE_HEIGHT - DEF.FLOOR_HEIGHT;
+                    pipes.get(i).setPositionXY(nextX, nextY);
+                }
+                pipes.get(i).render(gc);
+                pipes.get(i).update(DEF.SCENE_SHIFT_TIME);
+            }
+         }
     	 
     	 public void checkCollision() {
     		 
