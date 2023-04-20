@@ -1,18 +1,21 @@
 package angryflappybird;
 
+import java.awt.Color;
+import java.util.ArrayList;
+import java.util.Random;
+
 import javafx.animation.AnimationTimer;
 import javafx.animation.FadeTransition;
+import javafx.animation.KeyFrame;
 import javafx.animation.ParallelTransition;
+import javafx.animation.Timeline;
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.control.Button;
 import javafx.scene.image.ImageView;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
@@ -20,14 +23,15 @@ import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
-import java.util.ArrayList;
-import java.util.Random;
 
 //The Application layer
 public class AngryFlappyBird extends Application {
 	
 	private Defines DEF = new Defines();
-    
+    private Sound sound = new Sound();
+    private Score SCORE = new Score();
+
+
     // time related attributes
     private long clickTime, startTime, elapsedTime;   
     private AnimationTimer timer;
@@ -35,7 +39,11 @@ public class AngryFlappyBird extends Application {
     // game components
     private Sprite blob;
     private ArrayList<Sprite> floors;
-    
+    private ArrayList<Sprite> pipes;
+    private Text scoreText;
+    private int totalScore = 0;
+    private int livesLeft = 3;
+
     // game flags
     private boolean CLICKED, GAME_START, GAME_OVER;
     
@@ -73,12 +81,10 @@ public class AngryFlappyBird extends Application {
     }
     
     // the getContent method sets the Scene layer
-    private void resetGameControl() {
-        
+    private void resetGameControl() {      
         DEF.startButton.setOnMouseClicked(this::mouseClickHandler);
-        
-        gameControl = new VBox();
-        gameControl.getChildren().addAll(DEF.startButton);
+        gameControl = new VBox(25);
+        gameControl.getChildren().addAll(DEF.startButton,DEF.listView,DEF.normalEggBox,DEF.snoozeEggBox,DEF.pigBox); 
     }
     
     private void mouseClickHandler(MouseEvent e) {
@@ -89,28 +95,43 @@ public class AngryFlappyBird extends Application {
             clickTime = System.nanoTime();   
         }
     	GAME_START = true;
-        CLICKED = true;
+    	CLICKED = true;
+    	sound.play("wing.wav");
     }
     
-    private void resetGameScene(boolean firstEntry) {
-    	
+    private void resetGameScene(boolean firstEntry) {	
     	// reset variables
         CLICKED = false;
         GAME_OVER = false;
         GAME_START = false;
         floors = new ArrayList<>();
+        pipes = new ArrayList<>();
         
+        final ImageView[] backgrounds = new ImageView[]{
+                DEF.IMVIEW.get("backgroundDay"),
+                DEF.IMVIEW.get("backgroundAfternoon"),
+                DEF.IMVIEW.get("backgroundNight"),
+         };
+
+       
     	if(firstEntry) {
+            
     		// create two canvases
             Canvas canvas = new Canvas(DEF.SCENE_WIDTH, DEF.SCENE_HEIGHT);
             gc = canvas.getGraphicsContext2D();
-
-            // create a background
-            ImageView background = DEF.IMVIEW.get("background");
-            
-            // create the game scene
             gameScene = new Group();
-            gameScene.getChildren().addAll(background, canvas);
+            gameScene.getChildren().addAll(backgrounds[0], canvas, DEF.scoreText, DEF.livesText);
+            int[] currentBackgroundIndex = {0};
+            
+            Timeline timeline = new Timeline(
+                    new KeyFrame(Duration.seconds(10), event -> {
+                        gameScene.getChildren().clear();
+                        currentBackgroundIndex[0] = (currentBackgroundIndex[0] + 1) % backgrounds.length;
+                        gameScene.getChildren().addAll(backgrounds[currentBackgroundIndex[0]], canvas, DEF.scoreText, DEF.livesText);
+                    })            
+            );
+            timeline.setCycleCount(Timeline.INDEFINITE);
+            timeline.play();          
     	}
     	
     	// initialize floor
@@ -129,6 +150,26 @@ public class AngryFlappyBird extends Application {
         // initialize blob
         blob = new Sprite(DEF.BLOB_POS_X, DEF.BLOB_POS_Y,DEF.IMAGE.get("blob0"));
         blob.render(gc);
+        
+        // initialize pipe  
+        Random ran = new Random();
+        for (int i = 0; i < DEF.PIPE_COUNT; i++) {
+            int PIPEUP_POS_X = ran.nextInt((i+1)*200, (i+2)*200);
+//            System.out.println("1:" + PIPEUP_POS_X);
+            int PIPEUP_POS_Y = -20;
+            int PIPEDOWN_POS_Y = 400;
+
+            Sprite pipeUp = new Sprite(PIPEUP_POS_X, PIPEUP_POS_Y, DEF.IMAGE.get("pipeflap2"));
+            pipeUp.setVelocity(DEF.SCENE_SHIFT_INCR, 0);
+            pipeUp.render(gc);
+//                
+//            Sprite pipeDown = new Sprite(PIPEUP_POS_X + 40, PIPEDOWN_POS_Y, DEF.IMAGE.get("pipeflap"));
+//            pipeDown.setVelocity(DEF.SCENE_SHIFT_INCR, 0);
+//            pipeDown.render(gc);
+////            
+            pipes.add(pipeUp);
+//            pipes.add(pipeDown);
+        }
         
         // initialize timer
         startTime = System.nanoTime();
@@ -151,28 +192,30 @@ public class AngryFlappyBird extends Application {
     	     gc.clearRect(0, 0, DEF.SCENE_WIDTH, DEF.SCENE_HEIGHT);
 
     	     if (GAME_START) {
-    	    	 // step1: update floor
+    	    	 // step1: update floor and pipe
     	    	 moveFloor();
+    	    	 movePipe();
     	    	 
     	    	 // step2: update blob
     	    	 moveBlob();
     	    	 checkCollision();
+    	    	 passPipeEffect();
+    	    	 
     	     }
     	 }
     	 
     	 // step1: update floor
-    	 private void moveFloor() {
-    		
-    		for(int i=0; i<DEF.FLOOR_COUNT; i++) {
-    			if (floors.get(i).getPositionX() <= -DEF.FLOOR_WIDTH) {
-    				double nextX = floors.get((i+1)%DEF.FLOOR_COUNT).getPositionX() + DEF.FLOOR_WIDTH;
-    	        	double nextY = DEF.SCENE_HEIGHT - DEF.FLOOR_HEIGHT;
-    	        	floors.get(i).setPositionXY(nextX, nextY);
-    			}
-    			floors.get(i).render(gc);
-    			floors.get(i).update(DEF.SCENE_SHIFT_TIME);
-    		}
-    	 }
+    	 private void moveFloor() {            
+             for(int i=0; i<DEF.FLOOR_COUNT; i++) {
+                 if (floors.get(i).getPositionX() <= -DEF.FLOOR_WIDTH) {
+                     double nextX = floors.get((i+1)%DEF.FLOOR_COUNT).getPositionX() + DEF.FLOOR_WIDTH;
+                     double nextY = DEF.SCENE_HEIGHT - DEF.FLOOR_HEIGHT;
+                     floors.get(i).setPositionXY(nextX, nextY);
+                 }
+                 floors.get(i).render(gc);
+                 floors.get(i).update(DEF.SCENE_SHIFT_TIME);
+             }
+          }
     	 
     	 // step2: update blob
     	 private void moveBlob() {
@@ -198,13 +241,50 @@ public class AngryFlappyBird extends Application {
 			blob.render(gc);
     	 }
     	 
+    	 // step 3: update pipe
+    	 private void movePipe() {   
+             Random ran = new Random();             
+    	     for(int i=0; i<pipes.size(); i++) {   
+    	         if (pipes.get(i).getPositionX() <= -DEF.PIPE_WIDTH) { 
+                         System.out.println("X location" + pipes.get(i).getPositionX());
+                         double nextX1 = pipes.get((i+1)%DEF.PIPE_COUNT).getPositionX() + 300;
+                         System.out.println(nextX1);
+//                         double nextX2 = nextX1 + ran.nextInt(100, 250);
+                         System.out.println("nextX1" + nextX1);
+//                         System.out.println("nextX2" +nextX2);
+                         double nextY = ran.nextInt(-30, 0);
+                         pipes.get(i).setPositionXY(nextX1, nextY);
+                         pipes.get(i).setNotPassed(pipes.get(i));                         
+//                         double nextY1 = ran.nextInt(390, 420);
+//                         pipes.get(i+1).setPositionXY(nextX1, nextY1);
+//                         pipes.get(i+1).setNotPassed(pipes.get(i+2));    
+ 
+                 }
+    	         pipes.get(i).render(gc);
+    	         pipes.get(i).update(DEF.SCENE_SHIFT_TIME);   
+//    	         pipes.get(i + 1).render(gc);
+//    	         pipes.get(i + 1).update(DEF.SCENE_SHIFT_TIME);    
+    	      }
+           	         
+    	   }
+    	 
     	 public void checkCollision() {
     		 
     		// check collision  
 			for (Sprite floor: floors) {
 				GAME_OVER = GAME_OVER || blob.intersectsSprite(floor);
+				if (blob.intersectsSprite(floor)) {
+	                SCORE.updateLivesText(DEF.livesText, livesLeft--);
+	            }
 			}
 			
+			for (Sprite pipe : pipes) {
+			    GAME_OVER = GAME_OVER || blob.intersectsSprite(pipe);
+			    if (blob.intersectsSprite(pipe)) {
+                    SCORE.updateLivesText(DEF.livesText, livesLeft--);
+                }
+			}
+						    
 			// end the game when blob hit stuff
 			if (GAME_OVER) {
 				showHitEffect(); 
@@ -212,11 +292,23 @@ public class AngryFlappyBird extends Application {
 					floor.setVelocity(0, 0);
 				}
 				timer.stop();
-			}
-			
+			}					
     	 }
     	 
-	     private void showHitEffect() {
+    	 
+    	// show 
+    	private void passPipeEffect() {
+    	    for (Sprite pipe : pipes) {
+                if (blob.getPositionX() > pipe.getPositionX() && !pipe.isPassed()) {
+                    SCORE.updateScoreText(DEF.scoreText, totalScore++);
+                    pipe.setPassed(pipe);
+                    sound.play("point.mp3");
+                    break; 
+                }
+            }
+    	}    	 
+
+        private void showHitEffect() {
 	        ParallelTransition parallelTransition = new ParallelTransition();
 	        FadeTransition fadeTransition = new FadeTransition(Duration.seconds(DEF.TRANSITION_TIME), gameScene);
 	        fadeTransition.setToValue(0);
