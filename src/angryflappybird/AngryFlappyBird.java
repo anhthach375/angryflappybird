@@ -44,7 +44,6 @@ public class AngryFlappyBird extends Application {
     private int totalScore = 0;
     private int livesLeft = 3;
 
-
     // game flags
     private boolean CLICKED, GAME_START, GAME_OVER;
     
@@ -120,12 +119,6 @@ public class AngryFlappyBird extends Application {
     		// create two canvases
             Canvas canvas = new Canvas(DEF.SCENE_WIDTH, DEF.SCENE_HEIGHT);
             gc = canvas.getGraphicsContext2D();
-
-            // create a background
-            ImageView background = DEF.IMVIEW.get("backgroundDay");
-            
-            // create the game scene
-
             gameScene = new Group();
             gameScene.getChildren().addAll(backgrounds[0], canvas, DEF.scoreText, DEF.livesText);
             int[] currentBackgroundIndex = {0};
@@ -182,17 +175,6 @@ public class AngryFlappyBird extends Application {
         startTime = System.nanoTime();
         timer = new MyTimer();
         timer.start();
-        
-        // initialize pipe
-        for(int i=0; i<DEF.FLOOR_COUNT; i++) {
-            
-            int posX = i * DEF.FLOOR_WIDTH;
-            int posY = DEF.SCENE_HEIGHT - DEF.FLOOR_HEIGHT;
-            
-            Sprite pipe = new Sprite(1, 1, DEF.IMAGE.get("pipe"));
-            pipe.setVelocity(DEF.SCENE_SHIFT_INCR, 0);
-            pipe.render(gc);
-        }
     }
 
     //timer stuff
@@ -217,8 +199,7 @@ public class AngryFlappyBird extends Application {
     	    	 // step2: update blob
     	    	 moveBlob();
     	    	 checkCollision();
-    	    	 passPipeEffect();
-    	    	 
+    	    	 passPipeEffect();  	    	 
     	     }
     	 }
     	 
@@ -260,7 +241,6 @@ public class AngryFlappyBird extends Application {
     	 }
     	 
     	 // step 3: update pipe
-
     	 private void movePipe() {   
              Random ran = new Random();             
     	     for(int i=0; i<pipes.size(); i++) {   
