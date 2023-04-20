@@ -47,20 +47,9 @@ public class Defines {
     final int TRANSITION_CYCLE = 2;
     
     // coefficients related to the pipes
-//    Random ran = new Random();
     final int PIPE_WIDTH = 80;
     final int PIPE_HEIGHT = 200;
-//    int PIPEUP_POS_X = ran.nextInt(300, 400);
-//    int PIPEUP_POS_Y = ran.nextInt(-20, 5);
-//    
-////    int PIPEUP_POS_X1 = PIPEUP_POS_X + 250;
-////    int PIPEUP_POS_Y1 = ran.nextInt(-20, 5);
-//    
-//    int PIPEDOWN_POS_X = ran.nextInt(200, 300);
-//    int PIPEDOWN_POS_Y = ran.nextInt(390, 400);
-//    
-//    int PIPEDOWN_POS_X1 = PIPEDOWN_POS_X + 240;
-//    int PIPEDOWN_POS_Y1 = ran.nextInt(390, 400);
+    final int PIPE_COUNT = 50;
     
     final int PIPE_COUNT = 4; 
     
@@ -71,8 +60,9 @@ public class Defines {
     // coefficients  related to media display
     final String STAGE_TITLE = "Angry Flappy Bird";
 	private final String IMAGE_DIR = "../resources/images/";
+
     final String[] IMAGE_FILES = {"backgroundDay", "backgroundAfternoon", "backgroundNight", "blob0", "blob1", "blob2", "blob3", "floor", "pipeflap2", "pipeflap", "pig"};
-    
+
     final HashMap<String, ImageView> IMVIEW = new HashMap<String, ImageView>();
     final HashMap<String, Image> IMAGE = new HashMap<String, Image>();
     
@@ -123,7 +113,7 @@ public class Defines {
 		
 		// initialize scene nodes
 		startButton = new Button("Start Game!");
-				
+		
 		// initialize the ListView for level
 		ObservableList<String> levels = FXCollections.observableArrayList("Easy", "Medium", "Hard");
 		listView = new ListView<String>(levels);
