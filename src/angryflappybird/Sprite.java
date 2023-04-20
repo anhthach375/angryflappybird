@@ -14,6 +14,7 @@ public class Sprite {
     private double width;
     private double height;
     private String IMAGE_DIR = "../resources/images/";
+    private boolean isPassed = false;
 
     public Sprite() {
         this.positionX = 0;
@@ -86,4 +87,17 @@ public class Sprite {
         positionX += velocityX * time;
         positionY += velocityY * time;
     }
+
+    public boolean isPassed() {
+        return isPassed;
+    }
+    
+    public void setPassed(Sprite pipe) {
+        isPassed = true;
+    }
+    
+    public void setNotPassed(Sprite pipe) {
+        isPassed = false;
+    }
+
 }
