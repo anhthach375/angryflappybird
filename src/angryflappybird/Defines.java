@@ -49,13 +49,13 @@ public class Defines {
     // coefficients related to the pipes
     final int PIPE_WIDTH = 80;
     final int PIPE_HEIGHT = 200;
-    final int PIPE_COUNT = 50;
     
     final int PIPE_COUNT = 4; 
     
     // coefficients related to the pig
     final int PIG_WIDTH = 70;
     final int PIG_HEIGHT = 70;
+    final double PIG_VELOCITY = 0.4;
     
     // coefficients  related to media display
     final String STAGE_TITLE = "Angry Flappy Bird";
@@ -83,27 +83,27 @@ public class Defines {
     // constructor
 	Defines() {
 		
-		// initialize images
-		for(int i=0; i<IMAGE_FILES.length; i++) {
-			Image img;
-			if (i == 7) {
+	 // initialize images
+        for(int i=0; i< IMAGE_FILES.length; i++) {
+            Image img;
+            if (i == 7) {
                 img = new Image(pathImage(IMAGE_FILES[i]), FLOOR_WIDTH, FLOOR_HEIGHT, false, false);
 
-			}
-			else if (i == 3 || i == 4 || i == 5 | i == 6){
-				img = new Image(pathImage(IMAGE_FILES[i]), BLOB_WIDTH, BLOB_HEIGHT, false, false);
-			}
-			else if (i == 8 | i == 9){
-	             img = new Image(pathImage(IMAGE_FILES[i]), PIPE_WIDTH, PIPE_HEIGHT, false, false);
-			}
-			else if (i == 10) {
-	              img = new Image(pathImage(IMAGE_FILES[i]), PIG_WIDTH, PIG_HEIGHT, false, false);
-			}
-			else {
-				img = new Image(pathImage(IMAGE_FILES[i]), SCENE_WIDTH, SCENE_HEIGHT, false, false);
-			}
-    		IMAGE.put(IMAGE_FILES[i],img);
-    	}
+            }
+            else if (i == 3 || i == 4 || i == 5 | i == 6){
+                img = new Image(pathImage(IMAGE_FILES[i]), BLOB_WIDTH, BLOB_HEIGHT, false, false);
+            }
+            else if (i == 8 | i == 9){
+                 img = new Image(pathImage(IMAGE_FILES[i]), PIPE_WIDTH, PIPE_HEIGHT, false, false);
+            }
+            else if (i == 10) {
+                  img = new Image(pathImage(IMAGE_FILES[i]), PIG_WIDTH, PIG_HEIGHT, false, false);
+            }
+            else {
+                img = new Image(pathImage(IMAGE_FILES[i]), SCENE_WIDTH, SCENE_HEIGHT, false, false);
+            }
+            IMAGE.put(IMAGE_FILES[i],img);
+        }
 		
 		// initialize image views
 		for(int i=0; i<IMAGE_FILES.length; i++) {

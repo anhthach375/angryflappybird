@@ -40,6 +40,7 @@ public class AngryFlappyBird extends Application {
     private Sprite blob;
     private ArrayList<Sprite> floors;
     private ArrayList<Sprite> pipes;
+    private ArrayList<Sprite> pigs;
     private Text scoreText;
     private int totalScore = 0;
     private int livesLeft = 3;
@@ -171,6 +172,26 @@ public class AngryFlappyBird extends Application {
 //            pipes.add(pipeDown);
         }
         
+        // initialize pigs
+        for (int i=0; i < pipes.size(); i++) {
+            // each pipe has a one in 7 chance of making a pig
+            // boolean isPig = ran.nextInt(6)==3;
+            boolean isPig = true;
+            if (isPig) {
+                // make pig
+                double pigPosX = pipes.get(i).getPositionX();
+                double pigPosY = pipes.get(i).getPositionY();
+                Sprite pig = new Sprite(pigPosX, pigPosY, DEF.IMAGE.get("pig"));
+                pig.setVelocity(DEF.SCENE_SHIFT_INCR, DEF.PIG_VELOCITY);
+                
+                //render pig
+                pig.render(gc);
+                
+                //add to pig array list
+                pigs.add(pig);
+            }
+        }
+        
         // initialize timer
         startTime = System.nanoTime();
         timer = new MyTimer();
@@ -192,9 +213,10 @@ public class AngryFlappyBird extends Application {
     	     gc.clearRect(0, 0, DEF.SCENE_WIDTH, DEF.SCENE_HEIGHT);
 
     	     if (GAME_START) {
-    	    	 // step1: update floor and pipe
+    	    	 // step1: non-player components of game
     	    	 moveFloor();
     	    	 movePipe();
+    	    	 movePig();
     	    	 
     	    	 // step2: update blob
     	    	 moveBlob();
@@ -266,6 +288,19 @@ public class AngryFlappyBird extends Application {
     	      }
            	         
     	   }
+    	 
+    	// step 4: update pig
+         private void movePig() {            
+             for(int i=0; i<pigs.size(); i++) {
+//                 if (pigs.get(i).getPositionX() <= -DEF.FLOOR_WIDTH) {
+//                     double nextX = pigs.get((i+1)%DEF.FLOOR_COUNT).getPositionX() + DEF.FLOOR_WIDTH;
+//                     double nextY = DEF.SCENE_HEIGHT - DEF.FLOOR_HEIGHT;
+//                     floors.get(i).setPositionXY(nextX, nextY);
+//                 }
+                 pigs.get(i).render(gc);
+                 pigs.get(i).update(DEF.SCENE_SHIFT_TIME);
+             }
+          }
     	 
     	 public void checkCollision() {
     		 
