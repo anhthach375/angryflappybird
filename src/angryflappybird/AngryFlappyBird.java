@@ -171,8 +171,8 @@ public class AngryFlappyBird extends Application {
         Random ran = new Random();
         int prePosUpX = 0;
         for (int i = 0; i < DEF.PIPE_COUNT; i++) {
-            int PIPEUP_POS_X = ran.nextInt((i+1)*200, (i+2)*200);
-            if (PIPEUP_POS_X - prePosUpX <= 50) {
+            int PIPEUP_POS_X = ran.nextInt((i+1)*150, (i+2)*150);
+            if (PIPEUP_POS_X - prePosUpX <= 100) {
                 PIPEUP_POS_X += ran.nextInt(80, 150);
             }
             prePosUpX = PIPEUP_POS_X;
@@ -187,8 +187,8 @@ public class AngryFlappyBird extends Application {
         // initialize pipeDown
         int prePosDownX = 0;
         for (int i = 0; i < DEF.PIPE_COUNT; i++) {
-            int PIPEDOWN_POS_X = ran.nextInt((i+1)*200, (i+2)*200);
-            if (PIPEDOWN_POS_X - prePosDownX <= 50) {
+            int PIPEDOWN_POS_X = ran.nextInt((i+1)*150, (i+2)*150);
+            if (PIPEDOWN_POS_X - prePosDownX <= 100) {
                 PIPEDOWN_POS_X += ran.nextInt(80, 150);
             }
                 prePosDownX = PIPEDOWN_POS_X;         
@@ -272,7 +272,7 @@ public class AngryFlappyBird extends Application {
              Random ran = new Random();             
     	     for(int i=0; i<pipeUps.size(); i++) {   
     	         if (pipeUps.get(i).getPositionX() <= -DEF.PIPE_WIDTH) { 
-                         double nextX = pipeUps.get((i+1)%DEF.PIPE_COUNT).getPositionX() + ran.nextInt(290,350);
+                         double nextX = pipeUps.get((i+1)%DEF.PIPE_COUNT).getPositionX() + ran.nextInt(250,300);
                          double nextY = ran.nextInt(-40, 0);
                          pipeUps.get(i).setPositionXY(nextX, nextY);
                          pipeUps.get(i).setNotPassed(pipeUps.get(i));                            
@@ -286,7 +286,7 @@ public class AngryFlappyBird extends Application {
              Random ran = new Random();             
              for(int i=0; i<pipeDowns.size(); i++) {   
                  if (pipeDowns.get(i).getPositionX() <= -DEF.PIPE_WIDTH) { 
-                         double nextX = pipeDowns.get((i+1)%DEF.PIPE_COUNT).getPositionX() + ran.nextInt(290,350);
+                         double nextX = pipeDowns.get((i+1)%DEF.PIPE_COUNT).getPositionX() + ran.nextInt(250,300);
                          double nextY = ran.nextInt(380, 420);
                          pipeDowns.get(i).setPositionXY(nextX, nextY);
                          pipeDowns.get(i).setNotPassed(pipeDowns.get(i));                            
