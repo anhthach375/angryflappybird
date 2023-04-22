@@ -54,7 +54,7 @@ public class Defines {
     // coefficients related to the pig and egges
     final int PIG_WIDTH = 70;
     final int PIG_HEIGHT = 70;
-    final double PIG_VELOCITY = 0.4;
+    final double PIG_VELOCITY = 0.35;
     
     // coefficients related to the eggs
     final int EGG_WIDTH = 80;
