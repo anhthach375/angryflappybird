@@ -205,9 +205,9 @@ public class AngryFlappyBird extends Application {
         
         // initialize pigs
         for (int i=0; i < pipeUps.size(); i++) {
-            // boolean isInvisible = ran.nextInt(6)==0;
             // make pig
             Sprite pig = new Sprite();
+            // for one pipe, actually make one
             if(i%2==0) {
                 double pigPosX = pipeUps.get(i).getPositionX();
                 double pigPosY = pipeUps.get(i).getPositionY();
@@ -215,6 +215,7 @@ public class AngryFlappyBird extends Application {
                 pig.setImage(DEF.IMAGE.get("pig"));
                 pig.setVelocity(DEF.SCENE_SHIFT_INCR, DEF.PIG_VELOCITY);
             }
+            //else pig will effectively not exist in-game but will exist in the pig list
 
             
             //render pig
@@ -326,14 +327,21 @@ public class AngryFlappyBird extends Application {
          }
     	 
     	 // update pigs
-    	 private void movePigs() {   
-             Random ran = new Random();             
-             for(int i=0; i<pigs.size(); i++) {   
-                 if (pigs.get(i).getPositionX() <= -DEF.PIPE_WIDTH) { 
-                         double nextX = pigs.get((i+1)%DEF.PIPE_COUNT).getPositionX() + ran.nextInt(250,300);
-                         double nextY = ran.nextInt(-40, 0);
-                         pigs.get(i).setPositionXY(nextX, nextY);
-                         pigs.get(i).setNotPassed(pigs.get(i));                            
+    	 private void movePigs() {             
+             for(int i=0; i<pigs.size(); i++) {
+                 Random ran = new Random();
+                 double waitDistance = ran.nextInt(200,1000);
+                 if (pigs.get(i).getPositionX() <= -waitDistance) {
+                     //get X position from farthest pipe
+                     double nextX = 0;
+                     for (int j=0; j<pipeUps.size(); j++){
+                         if (pipeUps.get(j).getPositionX()>nextX) {
+                             nextX = pipeUps.get(j).getPositionX();
+                         }
+                     }
+                     double nextY = 0;
+                     pigs.get(i).setPositionXY(nextX, nextY);
+                     pigs.get(i).setNotPassed(pigs.get(i));                            
                  }
                  pigs.get(i).render(gc);
                  pigs.get(i).update(DEF.SCENE_SHIFT_TIME);      
@@ -365,7 +373,16 @@ public class AngryFlappyBird extends Application {
                     livesLeft--;
                     SCORE.updateLivesText(DEF.livesText, livesLeft);
                 }
-            }						    
+            }	
+			for (Sprite pig : pigs) {
+                GAME_OVER = GAME_OVER || blob.intersectsSprite(pig);
+                if (blob.intersectsSprite(pig)) {
+                    sound.play("pig_sound.mp3");
+                    livesLeft--;
+                    SCORE.updateLivesText(DEF.livesText, livesLeft);
+                    SCORE.resetScoreText(DEF.scoreText);
+                }
+            }
 			// end the game when blob hit stuff
 			if (GAME_OVER) {
 				showHitEffect(); 
@@ -406,6 +423,10 @@ public class AngryFlappyBird extends Application {
 	        parallelTransition.getChildren().add(fadeTransition);
 	        parallelTransition.play();
 	     }
+        
+        private void blobBounce() {
+            
+        }
     	 
     } // End of MyTimer class
 
