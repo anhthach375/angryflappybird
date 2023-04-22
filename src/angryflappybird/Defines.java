@@ -54,6 +54,7 @@ public class Defines {
     // coefficients related to the pig
     final int PIG_WIDTH = 70;
     final int PIG_HEIGHT = 70;
+    final double PIG_VELOCITY = 0.4;
     
     // coefficients  related to media display
     final String STAGE_TITLE = "Angry Flappy Bird";

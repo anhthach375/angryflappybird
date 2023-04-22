@@ -15,6 +15,7 @@ public class Sprite {
     private double height;
     private String IMAGE_DIR = "../resources/images/";
     private boolean isPassed = false;
+    private boolean isClear = false;
 
     public Sprite() {
         this.positionX = 0;
@@ -98,6 +99,10 @@ public class Sprite {
     
     public void setNotPassed(Sprite pipe) {
         isPassed = false;
+    }
+    
+    public void setClear() {
+        isClear = true;
     }
 
 }
