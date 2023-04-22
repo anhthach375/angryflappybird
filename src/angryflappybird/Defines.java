@@ -11,7 +11,6 @@ import javafx.scene.control.ListView;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
-import javafx.scene.text.FontPosture;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 
@@ -37,7 +36,7 @@ public class Defines {
     // coefficients related to the floors
     final int FLOOR_WIDTH = 400;
     final int FLOOR_HEIGHT = 100;
-    final int FLOOR_COUNT = 2;
+    final int FLOOR_COUNT = 3;
     
     // coefficients related to time
     final int SCENE_SHIFT_TIME = 5;
@@ -47,11 +46,10 @@ public class Defines {
     final int TRANSITION_CYCLE = 2;
     
     // coefficients related to the pipes
+    Random ran = new Random();
     final int PIPE_WIDTH = 80;
-    final int PIPE_HEIGHT = 200;
-    final int PIPE_COUNT = 50;
-    
-    final int PIPE_COUNT = 4; 
+    int PIPE_HEIGHT = 230;   
+    final int PIPE_COUNT = 2; 
     
     // coefficients related to the pig
     final int PIG_WIDTH = 70;
@@ -70,15 +68,14 @@ public class Defines {
     private final String IMAGE_MUSIC = "../resources/music/";
     final String[] MUSIC_FILES = {"wing.mp3"};
 
-
     //nodes on the scene graph
     Button startButton;
     ListView<String> listView;
     HBox normalEggBox;
     HBox snoozeEggBox;
     HBox pigBox;
-    Text scoreText;
-    Text livesText;
+    final Text scoreText = new Text("0");
+    final Text livesText = new Text("3 lives left");
     
     // constructor
 	Defines() {
@@ -135,19 +132,18 @@ public class Defines {
         pigBox.getChildren().add(new Text ("Avoid pigs"));
         
         // initialize the score
-        scoreText = new Text("0");
+//        final scoreText = new Text("0");
         scoreText.setStyle("-fx-font-size: 50;");
-//        scoreText.setFont(Font.font("Arial", 36));
+//        Font font = Font.getFont("Comic Sans MS");
+//        scoreText.setFont(Font.font(font, FontWeight.EXTRA_BOLD, 50));
         scoreText.setFill(javafx.scene.paint.Color.WHITE);
         scoreText.setLayoutX(20);
         scoreText.setLayoutY(50);
         
      // initialize the lives left
-        livesText = new Text("x " + "3");
-        livesText.setStyle("-fx-font-size: 40;");
-//        scoreText.setFont(Font.font("Arial", FontWeight.BOLD, FontPosture.REGULAR, 36));
+        livesText.setStyle("-fx-font-size: 35;");
         livesText.setFill(javafx.scene.paint.Color.WHITE);
-        livesText.setLayoutX(320);
+        livesText.setLayoutX(230);
         livesText.setLayoutY(550);
 
 	}
