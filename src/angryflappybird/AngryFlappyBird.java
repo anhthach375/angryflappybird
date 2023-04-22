@@ -134,6 +134,7 @@ public class AngryFlappyBird extends Application {
             ImageView background = DEF.IMVIEW.get("backgroundDay");
             
             // create the game scene
+            
             gameScene = new Group();
             gameScene.getChildren().addAll(backgrounds[0], canvas, DEF.scoreText, DEF.livesText);
             int[] currentBackgroundIndex = {0};
@@ -202,6 +203,7 @@ public class AngryFlappyBird extends Application {
         startTime = System.nanoTime();
         timer = new MyTimer();
         timer.start();      
+
     }
 
     //timer stuff
@@ -225,7 +227,6 @@ public class AngryFlappyBird extends Application {
     	    	 moveBlob();
     	    	 checkCollision();
     	    	 passPipeEffect();	
-    	    	 gameLoop();
     	     }
     	 }
     	 
