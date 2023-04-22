@@ -1,6 +1,5 @@
 package angryflappybird;
 
-import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -18,6 +17,7 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
@@ -41,6 +41,9 @@ public class AngryFlappyBird extends Application {
     private ArrayList<Sprite> floors;
     private ArrayList<Sprite> pipeUps;
     private ArrayList<Sprite> pipeDowns;
+    private ArrayList<Sprite> goldenEggs;
+//    private ArrayList<Sprite> pigs;
+
     private Text scoreText;
     private int totalScore;
     private int livesLeft;
@@ -100,15 +103,8 @@ public class AngryFlappyBird extends Application {
     	CLICKED = true;
     	sound.play("wing.wav");
     }
-    
-    public void gameLoop() {
-        if (livesLeft < 0) {
-            resetGameScene(false);
-            totalScore = 0;
-            livesLeft = 3;           
-        }
+   
         
-    }
     
     private void resetGameScene(boolean firstEntry) {	
     	// reset variables        
@@ -118,6 +114,7 @@ public class AngryFlappyBird extends Application {
         floors = new ArrayList<>();
         pipeUps = new ArrayList<>();
         pipeDowns = new ArrayList<>();
+        goldenEggs = new ArrayList<>();
         
         final ImageView[] backgrounds = new ImageView[]{
                 DEF.IMVIEW.get("backgroundDay"),
@@ -180,7 +177,7 @@ public class AngryFlappyBird extends Application {
 
             Sprite pipeUp = new Sprite(PIPEUP_POS_X, PIPEUP_POS_Y, DEF.IMAGE.get("pipeflap2"));
             pipeUp.setVelocity(DEF.SCENE_SHIFT_INCR, 0);
-            pipeUp.render(gc);
+            pipeUp.render(gc);         
 
             pipeUps.add(pipeUp);
         }        
@@ -192,13 +189,46 @@ public class AngryFlappyBird extends Application {
                 PIPEDOWN_POS_X += ran.nextInt(80, 150);
             }
                 prePosDownX = PIPEDOWN_POS_X;         
-            int PIPEDOWN_POS_Y = ran.nextInt(380, 400);               
+            int PIPEDOWN_POS_Y = ran.nextInt(380, 400);       
+            
             Sprite pipeDown = new Sprite(PIPEDOWN_POS_X, PIPEDOWN_POS_Y, DEF.IMAGE.get("pipeflap"));
             pipeDown.setVelocity(DEF.SCENE_SHIFT_INCR, 0);
-            pipeDown.render(gc);
-          
+            pipeDown.render(gc);    
+
             pipeDowns.add(pipeDown);
         }      
+        
+        // initialize the egg
+        for (Sprite pipeDown : pipeDowns) {
+            if (ran.nextInt(10) % 2 == 0) {
+                Sprite egg = new Sprite(pipeDown.getPositionX(), pipeDown.getPositionY() - 80, DEF.IMAGE.get("egg_golden"));
+                egg.setPositionXY(pipeDown.getPositionX(),  pipeDown.getPositionY() - 80);
+                egg.setVelocity(DEF.SCENE_SHIFT_INCR, 0);
+                egg.render(gc);
+                goldenEggs.add(egg);
+             }   
+        }
+        
+     // initialize pigs
+//        for (int i=0; i < pipeUps.size(); i++) {
+//            // boolean isInvisible = ran.nextInt(6)==0;
+//            // make pig
+//            Sprite pig = new Sprite();
+//            if(i%2==0) {
+//                double pigPosX = pipeUps.get(i).getPositionX();
+//                double pigPosY = pipeUps.get(i).getPositionY();
+//                pig.setPositionXY(pigPosX, pigPosY);
+//                pig.setImage(DEF.IMAGE.get("pig"));
+//                pig.setVelocity(DEF.SCENE_SHIFT_INCR, DEF.PIG_VELOCITY);
+//            }
+//            
+//            //render pig
+//            pig.render(gc);
+//            
+//            //add to pig array list
+//            pigs.add(pig);
+//        }
+                 
         // initialize timer
         startTime = System.nanoTime();
         timer = new MyTimer();
@@ -277,6 +307,7 @@ public class AngryFlappyBird extends Application {
                          pipeUps.get(i).setPositionXY(nextX, nextY);
                          pipeUps.get(i).setNotPassed(pipeUps.get(i));                            
                  }
+    	         
     	         pipeUps.get(i).render(gc);
     	         pipeUps.get(i).update(DEF.SCENE_SHIFT_TIME);      
     	      }      	         
@@ -315,11 +346,17 @@ public class AngryFlappyBird extends Application {
 			}
 			
 			for (Sprite pipe : pipeDowns) {
-                GAME_OVER = GAME_OVER || blob.intersectsSprite(pipe);
-                if (blob.intersectsSprite(pipe)) {
-                    livesLeft--;
-                    SCORE.updateLivesText(DEF.livesText, livesLeft);
-                }
+			    if (goldenEggs.contains(pipe)) {
+			        System.out.println("haha");
+			    }
+			    else {
+			        GAME_OVER = GAME_OVER || blob.intersectsSprite(pipe);
+	                if (blob.intersectsSprite(pipe)) {
+	                    livesLeft--;
+	                    SCORE.updateLivesText(DEF.livesText, livesLeft);
+	                }
+			    }
+                
             }						    
 			// end the game when blob hit stuff
 			if (GAME_OVER) {
