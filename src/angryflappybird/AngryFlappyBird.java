@@ -39,10 +39,12 @@ public class AngryFlappyBird extends Application {
     // game components
     private Sprite blob;
     private ArrayList<Sprite> floors;
-    private ArrayList<Sprite> pipes;
+    private ArrayList<Sprite> pipeUps;
+    private ArrayList<Sprite> pipeDowns;
     private Text scoreText;
-    private int totalScore = 0;
-    private int livesLeft = 3;
+    private int totalScore;
+    private int livesLeft;
+    private int hitTime;
 
     // game flags
     private boolean CLICKED, GAME_START, GAME_OVER;
@@ -99,32 +101,46 @@ public class AngryFlappyBird extends Application {
     	sound.play("wing.wav");
     }
     
+    public void gameLoop() {
+        if (livesLeft < 0) {
+            resetGameScene(false);
+            totalScore = 0;
+            livesLeft = 3;           
+        }
+        
+    }
+    
     private void resetGameScene(boolean firstEntry) {	
-    	// reset variables
+    	// reset variables        
         CLICKED = false;
         GAME_OVER = false;
         GAME_START = false;
         floors = new ArrayList<>();
-        pipes = new ArrayList<>();
+        pipeUps = new ArrayList<>();
+        pipeDowns = new ArrayList<>();
         
         final ImageView[] backgrounds = new ImageView[]{
                 DEF.IMVIEW.get("backgroundDay"),
                 DEF.IMVIEW.get("backgroundAfternoon"),
                 DEF.IMVIEW.get("backgroundNight"),
          };
-
        
-    	if(firstEntry) {
-            
+    	if(firstEntry) {           
     		// create two canvases
             Canvas canvas = new Canvas(DEF.SCENE_WIDTH, DEF.SCENE_HEIGHT);
             gc = canvas.getGraphicsContext2D();
+
+            // create a background
+            ImageView background = DEF.IMVIEW.get("backgroundDay");
+            
+            // create the game scene
+            
             gameScene = new Group();
             gameScene.getChildren().addAll(backgrounds[0], canvas, DEF.scoreText, DEF.livesText);
             int[] currentBackgroundIndex = {0};
             
             Timeline timeline = new Timeline(
-                    new KeyFrame(Duration.seconds(10), event -> {
+                    new KeyFrame(Duration.seconds(15), event -> {
                         gameScene.getChildren().clear();
                         currentBackgroundIndex[0] = (currentBackgroundIndex[0] + 1) % backgrounds.length;
                         gameScene.getChildren().addAll(backgrounds[currentBackgroundIndex[0]], canvas, DEF.scoreText, DEF.livesText);
@@ -151,37 +167,48 @@ public class AngryFlappyBird extends Application {
         blob = new Sprite(DEF.BLOB_POS_X, DEF.BLOB_POS_Y,DEF.IMAGE.get("blob0"));
         blob.render(gc);
         
-        // initialize pipe  
+        // initialize pipeUp  
         Random ran = new Random();
+        int prePosUpX = 0;
         for (int i = 0; i < DEF.PIPE_COUNT; i++) {
             int PIPEUP_POS_X = ran.nextInt((i+1)*200, (i+2)*200);
-//            System.out.println("1:" + PIPEUP_POS_X);
-            int PIPEUP_POS_Y = -20;
-            int PIPEDOWN_POS_Y = 400;
+            if (PIPEUP_POS_X - prePosUpX <= 50) {
+                PIPEUP_POS_X += ran.nextInt(80, 150);
+            }
+            prePosUpX = PIPEUP_POS_X;
+            int PIPEUP_POS_Y = ran.nextInt(-20, 0);
 
             Sprite pipeUp = new Sprite(PIPEUP_POS_X, PIPEUP_POS_Y, DEF.IMAGE.get("pipeflap2"));
             pipeUp.setVelocity(DEF.SCENE_SHIFT_INCR, 0);
             pipeUp.render(gc);
-//                
-//            Sprite pipeDown = new Sprite(PIPEUP_POS_X + 40, PIPEDOWN_POS_Y, DEF.IMAGE.get("pipeflap"));
-//            pipeDown.setVelocity(DEF.SCENE_SHIFT_INCR, 0);
-//            pipeDown.render(gc);
-////            
-            pipes.add(pipeUp);
-//            pipes.add(pipeDown);
-        }
-        
+
+            pipeUps.add(pipeUp);
+        }        
+        // initialize pipeDown
+        int prePosDownX = 0;
+        for (int i = 0; i < DEF.PIPE_COUNT; i++) {
+            int PIPEDOWN_POS_X = ran.nextInt((i+1)*200, (i+2)*200);
+            if (PIPEDOWN_POS_X - prePosDownX <= 50) {
+                PIPEDOWN_POS_X += ran.nextInt(80, 150);
+            }
+                prePosDownX = PIPEDOWN_POS_X;         
+            int PIPEDOWN_POS_Y = ran.nextInt(380, 400);               
+            Sprite pipeDown = new Sprite(PIPEDOWN_POS_X, PIPEDOWN_POS_Y, DEF.IMAGE.get("pipeflap"));
+            pipeDown.setVelocity(DEF.SCENE_SHIFT_INCR, 0);
+            pipeDown.render(gc);
+          
+            pipeDowns.add(pipeDown);
+        }      
         // initialize timer
         startTime = System.nanoTime();
         timer = new MyTimer();
-        timer.start();
+        timer.start();      
+
     }
 
     //timer stuff
-    class MyTimer extends AnimationTimer {
-    	
-    	int counter = 0;
-    	
+    class MyTimer extends AnimationTimer { 	
+    	int counter = 0;  	
     	 @Override
     	 public void handle(long now) {   		 
     		 // time keeping
@@ -194,12 +221,12 @@ public class AngryFlappyBird extends Application {
     	     if (GAME_START) {
     	    	 // step1: update floor and pipe
     	    	 moveFloor();
-    	    	 movePipe();
-    	    	 
+    	    	 movePipeUp();
+                 movePipeDown();   	    	 
     	    	 // step2: update blob
     	    	 moveBlob();
     	    	 checkCollision();
-    	    	 passPipeEffect();  	    	 
+    	    	 passPipeEffect();	
     	     }
     	 }
     	 
@@ -241,49 +268,59 @@ public class AngryFlappyBird extends Application {
     	 }
     	 
     	 // step 3: update pipe
-    	 private void movePipe() {   
+    	 private void movePipeUp() {   
              Random ran = new Random();             
-    	     for(int i=0; i<pipes.size(); i++) {   
-    	         if (pipes.get(i).getPositionX() <= -DEF.PIPE_WIDTH) { 
-                         System.out.println("X location" + pipes.get(i).getPositionX());
-                         double nextX1 = pipes.get((i+1)%DEF.PIPE_COUNT).getPositionX() + 300;
-                         System.out.println(nextX1);
-//                         double nextX2 = nextX1 + ran.nextInt(100, 250);
-                         System.out.println("nextX1" + nextX1);
-//                         System.out.println("nextX2" +nextX2);
-                         double nextY = ran.nextInt(-30, 0);
-                         pipes.get(i).setPositionXY(nextX1, nextY);
-                         pipes.get(i).setNotPassed(pipes.get(i));                         
-//                         double nextY1 = ran.nextInt(390, 420);
-//                         pipes.get(i+1).setPositionXY(nextX1, nextY1);
-//                         pipes.get(i+1).setNotPassed(pipes.get(i+2));    
- 
+    	     for(int i=0; i<pipeUps.size(); i++) {   
+    	         if (pipeUps.get(i).getPositionX() <= -DEF.PIPE_WIDTH) { 
+                         double nextX = pipeUps.get((i+1)%DEF.PIPE_COUNT).getPositionX() + ran.nextInt(290,350);
+                         double nextY = ran.nextInt(-40, 0);
+                         pipeUps.get(i).setPositionXY(nextX, nextY);
+                         pipeUps.get(i).setNotPassed(pipeUps.get(i));                            
                  }
-    	         pipes.get(i).render(gc);
-    	         pipes.get(i).update(DEF.SCENE_SHIFT_TIME);   
-//    	         pipes.get(i + 1).render(gc);
-//    	         pipes.get(i + 1).update(DEF.SCENE_SHIFT_TIME);    
-    	      }
-           	         
-    	   }
+    	         pipeUps.get(i).render(gc);
+    	         pipeUps.get(i).update(DEF.SCENE_SHIFT_TIME);      
+    	      }      	         
+    	 }
     	 
-    	 public void checkCollision() {
-    		 
-    		// check collision  
+    	 private void movePipeDown() {   
+             Random ran = new Random();             
+             for(int i=0; i<pipeDowns.size(); i++) {   
+                 if (pipeDowns.get(i).getPositionX() <= -DEF.PIPE_WIDTH) { 
+                         double nextX = pipeDowns.get((i+1)%DEF.PIPE_COUNT).getPositionX() + ran.nextInt(290,350);
+                         double nextY = ran.nextInt(380, 420);
+                         pipeDowns.get(i).setPositionXY(nextX, nextY);
+                         pipeDowns.get(i).setNotPassed(pipeDowns.get(i));                            
+                 }
+                 pipeDowns.get(i).render(gc);
+                 pipeDowns.get(i).update(DEF.SCENE_SHIFT_TIME);      
+              }                  
+         }
+    	 
+    	 public void checkCollision() {   		 
+    		// check collision      	        
 			for (Sprite floor: floors) {
 				GAME_OVER = GAME_OVER || blob.intersectsSprite(floor);
 				if (blob.intersectsSprite(floor)) {
 	                SCORE.updateLivesText(DEF.livesText, livesLeft--);
-	            }
+	                livesLeft--;         
+	             }
 			}
 			
-			for (Sprite pipe : pipes) {
+			for (Sprite pipe : pipeUps) {
 			    GAME_OVER = GAME_OVER || blob.intersectsSprite(pipe);
 			    if (blob.intersectsSprite(pipe)) {
+                    livesLeft--;           
                     SCORE.updateLivesText(DEF.livesText, livesLeft--);
-                }
+                    }
 			}
-						    
+			
+			for (Sprite pipe : pipeDowns) {
+                GAME_OVER = GAME_OVER || blob.intersectsSprite(pipe);
+                if (blob.intersectsSprite(pipe)) {
+                    livesLeft--;
+                    SCORE.updateLivesText(DEF.livesText, livesLeft);
+                }
+            }						    
 			// end the game when blob hit stuff
 			if (GAME_OVER) {
 				showHitEffect(); 
@@ -291,13 +328,21 @@ public class AngryFlappyBird extends Application {
 					floor.setVelocity(0, 0);
 				}
 				timer.stop();
-			}					
+			}				
     	 }
     	 
-    	 
+    	
     	// show 
     	private void passPipeEffect() {
-    	    for (Sprite pipe : pipes) {
+    	    for (Sprite pipe : pipeUps) {
+                if (blob.getPositionX() > pipe.getPositionX() && !pipe.isPassed()) {
+                    SCORE.updateScoreText(DEF.scoreText, totalScore++);
+                    pipe.setPassed(pipe);
+                    sound.play("point.mp3");
+                    break; 
+                }
+            }
+    	    for (Sprite pipe : pipeDowns) {
                 if (blob.getPositionX() > pipe.getPositionX() && !pipe.isPassed()) {
                     SCORE.updateScoreText(DEF.scoreText, totalScore++);
                     pipe.setPassed(pipe);
