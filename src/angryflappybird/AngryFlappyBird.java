@@ -41,9 +41,7 @@ public class AngryFlappyBird extends Application {
     private ArrayList<Sprite> floors;
     private ArrayList<Sprite> pipeUps;
     private ArrayList<Sprite> pipeDowns;
-    private ArrayList<Sprite> goldenEggs;
-//    private ArrayList<Sprite> pigs;
-
+    private ArrayList<Sprite> pigs;
     private Text scoreText;
     private int totalScore;
     private int livesLeft;
@@ -114,6 +112,7 @@ public class AngryFlappyBird extends Application {
         floors = new ArrayList<>();
         pipeUps = new ArrayList<>();
         pipeDowns = new ArrayList<>();
+        pigs = new ArrayList<>();
         goldenEggs = new ArrayList<>();
         
         final ImageView[] backgrounds = new ImageView[]{
@@ -180,7 +179,8 @@ public class AngryFlappyBird extends Application {
             pipeUp.render(gc);         
 
             pipeUps.add(pipeUp);
-        }        
+        }   
+        
         // initialize pipeDown
         int prePosDownX = 0;
         for (int i = 0; i < DEF.PIPE_COUNT; i++) {
@@ -198,6 +198,27 @@ public class AngryFlappyBird extends Application {
             pipeDowns.add(pipeDown);
         }      
         
+        // initialize pigs
+        for (int i=0; i < pipeUps.size(); i++) {
+            // boolean isInvisible = ran.nextInt(6)==0;
+            // make pig
+            Sprite pig = new Sprite();
+            if(i%2==0) {
+                double pigPosX = pipeUps.get(i).getPositionX();
+                double pigPosY = pipeUps.get(i).getPositionY();
+                pig.setPositionXY(pigPosX, pigPosY);
+                pig.setImage(DEF.IMAGE.get("pig"));
+                pig.setVelocity(DEF.SCENE_SHIFT_INCR, DEF.PIG_VELOCITY);
+            }
+
+            
+            //render pig
+            pig.render(gc);
+            
+            //add to pig array list
+            pigs.add(pig);
+        }
+        
         // initialize the egg
         for (Sprite pipeDown : pipeDowns) {
             if (ran.nextInt(10) % 2 == 0) {
@@ -209,30 +230,10 @@ public class AngryFlappyBird extends Application {
              }   
         }
         
-     // initialize pigs
-//        for (int i=0; i < pipeUps.size(); i++) {
-//            // boolean isInvisible = ran.nextInt(6)==0;
-//            // make pig
-//            Sprite pig = new Sprite();
-//            if(i%2==0) {
-//                double pigPosX = pipeUps.get(i).getPositionX();
-//                double pigPosY = pipeUps.get(i).getPositionY();
-//                pig.setPositionXY(pigPosX, pigPosY);
-//                pig.setImage(DEF.IMAGE.get("pig"));
-//                pig.setVelocity(DEF.SCENE_SHIFT_INCR, DEF.PIG_VELOCITY);
-//            }
-//            
-//            //render pig
-//            pig.render(gc);
-//            
-//            //add to pig array list
-//            pigs.add(pig);
-//        }
-                 
         // initialize timer
         startTime = System.nanoTime();
         timer = new MyTimer();
-        timer.start();      
+        timer.start();  
 
     }
 
@@ -249,12 +250,14 @@ public class AngryFlappyBird extends Application {
     	     gc.clearRect(0, 0, DEF.SCENE_WIDTH, DEF.SCENE_HEIGHT);
 
     	     if (GAME_START) {
-    	    	 // step1: update floor and pipe
+    	    	 // step1: update non-player objects
     	    	 moveFloor();
     	    	 movePipeUp();
-                 movePipeDown();   	    	 
+                 movePipeDown();
+                 movePigs();
     	    	 // step2: update blob
     	    	 moveBlob();
+    	    	 // step3: check for extras
     	    	 checkCollision();
     	    	 passPipeEffect();	
     	     }
@@ -326,6 +329,22 @@ public class AngryFlappyBird extends Application {
                  pipeDowns.get(i).update(DEF.SCENE_SHIFT_TIME);      
               }                  
          }
+    	 
+    	 // update pigs
+    	 private void movePigs() {   
+             Random ran = new Random();             
+             for(int i=0; i<pigs.size(); i++) {   
+                 if (pigs.get(i).getPositionX() <= -DEF.PIPE_WIDTH) { 
+                         double nextX = pigs.get((i+1)%DEF.PIPE_COUNT).getPositionX() + ran.nextInt(250,300);
+                         double nextY = ran.nextInt(-40, 0);
+                         pigs.get(i).setPositionXY(nextX, nextY);
+                         pigs.get(i).setNotPassed(pigs.get(i));                            
+                 }
+                 pigs.get(i).render(gc);
+                 pigs.get(i).update(DEF.SCENE_SHIFT_TIME);      
+              }                  
+         }
+    	 
     	 
     	 public void checkCollision() {   		 
     		// check collision      	        
