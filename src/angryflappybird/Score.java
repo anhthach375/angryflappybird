@@ -7,6 +7,6 @@ public class Score {
         text.setText(Integer.toString(score+1));
     }
     public void updateLivesText(Text text, int score) {
-        text.setText("x " + Integer.toString(score-1));
+        text.setText(Integer.toString(score-1) + " lives left");
     }
 }
