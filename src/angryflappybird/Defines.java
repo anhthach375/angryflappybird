@@ -51,16 +51,22 @@ public class Defines {
     int PIPE_HEIGHT = 230;   
     final int PIPE_COUNT = 2; 
     
-    // coefficients related to the pig
+    // coefficients related to the pig and egges
     final int PIG_WIDTH = 70;
     final int PIG_HEIGHT = 70;
     final double PIG_VELOCITY = 0.4;
+    
+    // coefficients related to the eggs
+    final int EGG_WIDTH = 80;
+    final int EGG_HEIGHT = 90;
     
     // coefficients  related to media display
     final String STAGE_TITLE = "Angry Flappy Bird";
 	private final String IMAGE_DIR = "../resources/images/";
 
-    final String[] IMAGE_FILES = {"backgroundDay", "backgroundAfternoon", "backgroundNight", "blob0", "blob1", "blob2", "blob3", "floor", "pipeflap2", "pipeflap", "pig"};
+    final String[] IMAGE_FILES = 
+        {"backgroundDay", "backgroundAfternoon", "backgroundNight", "blob0", "blob1", "blob2", "blob3", "floor", "pipeflap2",
+         "pipeflap", "pig", "egg_white", "egg_golden"};
 
     final HashMap<String, ImageView> IMVIEW = new HashMap<String, ImageView>();
     final HashMap<String, Image> IMAGE = new HashMap<String, Image>();
@@ -97,6 +103,9 @@ public class Defines {
 			else if (i == 10) {
 	              img = new Image(pathImage(IMAGE_FILES[i]), PIG_WIDTH, PIG_HEIGHT, false, false);
 			}
+			else if (i == 11 | i == 12) {
+	               img = new Image(pathImage(IMAGE_FILES[i]), EGG_WIDTH, EGG_HEIGHT, false, false);
+			}
 			else {
 				img = new Image(pathImage(IMAGE_FILES[i]), SCENE_WIDTH, SCENE_HEIGHT, false, false);
 			}
@@ -119,12 +128,12 @@ public class Defines {
 	    
 	    // initialize the normal egg's description
 	    normalEggBox= new HBox();
-	    normalEggBox.getChildren().add(IMVIEW.get("blob1"));
+	    normalEggBox.getChildren().add(IMVIEW.get("egg_white"));
 	    normalEggBox.getChildren().add(new Text ("Bonus points"));
 	    
 	    // initialize the snooze egg's description
 	    snoozeEggBox= new HBox();
-        snoozeEggBox.getChildren().add(IMVIEW.get("blob0"));
+        snoozeEggBox.getChildren().add(IMVIEW.get("egg_golden"));
         snoozeEggBox.getChildren().add(new Text ("Lets you snooze"));
 	    
         // initialize the snooze egg's description
