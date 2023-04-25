@@ -330,7 +330,7 @@ public class AngryFlappyBird extends Application {
     	 private void movePigs() {             
              for(int i=0; i<pigs.size(); i++) {
                  Random ran = new Random();
-                 double waitDistance = ran.nextInt(200,1000);
+                 double waitDistance = ran.nextInt(200,1200);
                  if (pigs.get(i).getPositionX() <= -waitDistance) {
                      //get X position from farthest pipe
                      double nextX = 0;
