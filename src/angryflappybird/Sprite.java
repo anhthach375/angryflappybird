@@ -3,6 +3,7 @@ package angryflappybird;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 
 public class Sprite {  
 	
@@ -16,6 +17,7 @@ public class Sprite {
     private String IMAGE_DIR = "../resources/images/";
     private boolean isPassed = false;
     private boolean isClear = false;
+    public boolean isSnoozed;
 
     public Sprite() {
         this.positionX = 0;
@@ -100,9 +102,11 @@ public class Sprite {
     public void setNotPassed(Sprite pipe) {
         isPassed = false;
     }
-    
-    public void setClear() {
-        isClear = true;
-    }
 
+    public void setVisible(boolean visible) {
+        if (!visible) {
+            image = null;
+        }
+    }
+    
 }

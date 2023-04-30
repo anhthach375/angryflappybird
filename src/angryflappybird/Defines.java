@@ -14,24 +14,28 @@ import javafx.scene.layout.HBox;
 import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 
-public class Defines {
+public class Defines { 
     
 	// dimension of the GUI application
     final int APP_HEIGHT = 600;
     final int APP_WIDTH = 600;
     final int SCENE_HEIGHT = 570;
     final int SCENE_WIDTH = 400;
+    final int START_WIDTH = 300;
+    final int START_HEIGHT = 100;
+    final int OVER_WIDTH = 300;
+    final int OVER_HEIGHT = 300;
 
     // coefficients related to the blob
-    final int BLOB_WIDTH = 70;
-    final int BLOB_HEIGHT = 70;
-    final int BLOB_POS_X = 70;
-    final int BLOB_POS_Y = 200;
+    final int BLOB_WIDTH = 170;
+    final int BLOB_HEIGHT = 170;
+    final int BLOB_POS_X = 30;
+    final int BLOB_POS_Y = 10;
     final int BLOB_DROP_TIME = 300000000;  	// the elapsed time threshold before the blob starts dropping
-    final int BLOB_DROP_VEL = 300;    		// the blob drop velocity
+    final int BLOB_DROP_VEL = 200;    		// the blob drop velocity
     final int BLOB_FLY_VEL = -40;
     final int BLOB_IMG_LEN = 4;
-    final int BLOB_IMG_PERIOD = 5;
+    final int BLOB_IMG_PERIOD = 6;
     
     // coefficients related to the floors
     final int FLOOR_WIDTH = 400;
@@ -46,27 +50,31 @@ public class Defines {
     final int TRANSITION_CYCLE = 2;
     
     // coefficients related to the pipes
-    Random ran = new Random();
-    final int PIPE_WIDTH = 80;
-    int PIPE_HEIGHT = 230;   
+    final int PIPE_WIDTH = 70;
+    int PIPE_HEIGHT = 200;   
     final int PIPE_COUNT = 2; 
     
-    // coefficients related to the pig and egges
-    final int PIG_WIDTH = 70;
-    final int PIG_HEIGHT = 70;
-    final double PIG_VELOCITY = 0.4;
+    // coefficients related to the godmother
+    final int GODMOTHER_WIDTH = 80;
+    final int GODMOTHER_HEIGHT = 80;
+    final double GODMOTHER_VELOCITY = 0.2;
     
-    // coefficients related to the eggs
+    // coefficients related to the eggs and peach
     final int EGG_WIDTH = 80;
-    final int EGG_HEIGHT = 90;
+    final int EGG_HEIGHT = 80;
+    
+    // coefficients related to the snoozedfairy
+    final int SNOOZEDFAIRY_WIDTH = 300;
+    final int SNOOZEDFAIRY_HEIGHT = 300;
+    final double SNOOZEDFAIRY_VELOCITY = 0.5;
     
     // coefficients  related to media display
     final String STAGE_TITLE = "Angry Flappy Bird";
 	private final String IMAGE_DIR = "../resources/images/";
 
     final String[] IMAGE_FILES = 
-        {"backgroundDay", "backgroundAfternoon", "backgroundNight", "blob0", "blob1", "blob2", "blob3", "floor", "pipeflap2",
-         "pipeflap", "pig", "egg_white", "egg_golden"};
+        {"backgroundDay", "backgroundAfternoon", "backgroundNight", "kiki01", "kiki02", "kiki03", "kiki04", "floor", "pipeflap2",
+         "pipeflap", "bread", "peach", "egg", "ready", "gameover"};
 
     final HashMap<String, ImageView> IMVIEW = new HashMap<String, ImageView>();
     final HashMap<String, Image> IMAGE = new HashMap<String, Image>();
@@ -78,11 +86,12 @@ public class Defines {
     //nodes on the scene graph
     Button startButton;
     ListView<String> listView;
-    HBox normalEggBox;
+    HBox peachBox;
     HBox snoozeEggBox;
-    HBox pigBox;
-    final Text scoreText = new Text("0");
-    final Text livesText = new Text("3 lives left");
+    HBox breadBox;
+    Text scoreText = new Text("0");
+    Text livesText = new Text("3 lives left");
+    Text snoozeTime = new Text("");
     
     // constructor
 	Defines() {
@@ -101,10 +110,16 @@ public class Defines {
 	             img = new Image(pathImage(IMAGE_FILES[i]), PIPE_WIDTH, PIPE_HEIGHT, false, false);
 			}
 			else if (i == 10) {
-	              img = new Image(pathImage(IMAGE_FILES[i]), PIG_WIDTH, PIG_HEIGHT, false, false);
+	              img = new Image(pathImage(IMAGE_FILES[i]), GODMOTHER_WIDTH, GODMOTHER_HEIGHT, false, false);
 			}
 			else if (i == 11 | i == 12) {
 	               img = new Image(pathImage(IMAGE_FILES[i]), EGG_WIDTH, EGG_HEIGHT, false, false);
+			}
+			else if (i == 13) {
+                img = new Image(pathImage(IMAGE_FILES[i]), START_WIDTH, START_HEIGHT, false, false);
+			}
+			else if (i == 14) {
+                img = new Image(pathImage(IMAGE_FILES[i]), OVER_WIDTH, OVER_HEIGHT, false, false);
 			}
 			else {
 				img = new Image(pathImage(IMAGE_FILES[i]), SCENE_WIDTH, SCENE_HEIGHT, false, false);
@@ -127,24 +142,22 @@ public class Defines {
 	    listView.setMaxSize(200, 80);
 	    
 	    // initialize the normal egg's description
-	    normalEggBox= new HBox();
-	    normalEggBox.getChildren().add(IMVIEW.get("egg_white"));
-	    normalEggBox.getChildren().add(new Text ("Bonus points"));
+	    peachBox= new HBox();
+	    peachBox.getChildren().add(IMVIEW.get("peach"));
+	    peachBox.getChildren().add(new Text ("Bonus points"));
 	    
 	    // initialize the snooze egg's description
 	    snoozeEggBox= new HBox();
-        snoozeEggBox.getChildren().add(IMVIEW.get("egg_golden"));
+        snoozeEggBox.getChildren().add(IMVIEW.get("egg"));
         snoozeEggBox.getChildren().add(new Text ("Lets you snooze"));
 	    
         // initialize the snooze egg's description
-        pigBox = new HBox();
-        pigBox.getChildren().add(IMVIEW.get("pig"));
-        pigBox.getChildren().add(new Text ("Avoid pigs"));
+        breadBox = new HBox();
+        breadBox.getChildren().add(IMVIEW.get("bread"));
+        breadBox.getChildren().add(new Text ("Avoid bread"));
         
         // initialize the score
-//        final scoreText = new Text("0");
         scoreText.setStyle("-fx-font-size: 50;");
-//        Font font = Font.getFont("Comic Sans MS");
 //        scoreText.setFont(Font.font(font, FontWeight.EXTRA_BOLD, 50));
         scoreText.setFill(javafx.scene.paint.Color.WHITE);
         scoreText.setLayoutX(20);
@@ -152,9 +165,15 @@ public class Defines {
         
      // initialize the lives left
         livesText.setStyle("-fx-font-size: 35;");
-        livesText.setFill(javafx.scene.paint.Color.WHITE);
-        livesText.setLayoutX(230);
+        livesText.setFill(javafx.scene.paint.Color.RED);
+        livesText.setLayoutX(210);
         livesText.setLayoutY(550);
+        
+        // initialized the second count
+        snoozeTime.setStyle("-fx-font-size: 35;");
+        snoozeTime.setFill(javafx.scene.paint.Color.YELLOW);
+        snoozeTime.setLayoutX(20);
+        snoozeTime.setLayoutY(130);   
 
 	}
 	
