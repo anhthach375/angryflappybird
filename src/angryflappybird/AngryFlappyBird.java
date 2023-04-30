@@ -388,6 +388,7 @@ public class AngryFlappyBird extends Application {
                  eggs.get(i).update(DEF.SCENE_SHIFT_TIME);                                      
               }                  
          } 	 
+         
     	 public void checkCollision() {   	
     	     ImageView gameoverImage = DEF.IMVIEW.get("gameover");
              gameoverImage.setX(DEF.SCENE_WIDTH / 2 - gameoverImage.getBoundsInLocal().getWidth() / 2);
@@ -423,6 +424,26 @@ public class AngryFlappyBird extends Application {
                         sound.play("point.mp3");
                         break;
                     }
+         }    	 
+    	 
+			// end the game when blob hit stuff
+			if (GAME_OVER) {
+				showHitEffect(); 
+				for (Sprite floor: floors) {
+					floor.setVelocity(0, 0);
+				}
+				timer.stop();
+			}				
+  }  	 
+    	
+    	// show 
+    	private void passPipeEffect() {
+    	    for (Sprite pipe : pipeUps) {
+                if (blob.getPositionX() > pipe.getPositionX() && !pipe.isPassed()) {
+                    SCORE.updateScoreText(DEF.scoreText, totalScore++);
+                    pipe.setPassed(pipe);
+                    sound.play("point.mp3");
+                    break; 
                 }
                 for (Sprite egg : eggs) {
                     if (blob.intersectsSprite(egg) && !egg.isPassed()) {
@@ -484,6 +505,10 @@ public class AngryFlappyBird extends Application {
 	        fadeTransition.setAutoReverse(true);	        
 	        parallelTransition.play();
 	     }
+        
+        private void blobBounce() {
+            
+        }
     	 
     } // End of MyTimer class
 
