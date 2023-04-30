@@ -1,15 +1,19 @@
 package angryflappybird;
 
-import java.awt.Color;
+import java.awt.event.ActionEvent;
+import java.beans.EventHandler;
 import java.util.ArrayList;
 import java.util.Random;
+import java.util.concurrent.atomic.AtomicInteger;
 
+import javafx.animation.Animation;
 import javafx.animation.AnimationTimer;
 import javafx.animation.FadeTransition;
 import javafx.animation.KeyFrame;
 import javafx.animation.ParallelTransition;
 import javafx.animation.Timeline;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.scene.Group;
 import javafx.scene.Scene;
@@ -22,7 +26,6 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.util.Duration;
-
 
 //The Application layer
 public class AngryFlappyBird extends Application {
@@ -41,11 +44,18 @@ public class AngryFlappyBird extends Application {
     private ArrayList<Sprite> floors;
     private ArrayList<Sprite> pipeUps;
     private ArrayList<Sprite> pipeDowns;
-    private ArrayList<Sprite> pigs;
+    private ArrayList<Sprite> breads;
+    private ArrayList<Sprite> peaches;
+    private ArrayList<Sprite> eggs;
     private Text scoreText;
     private int totalScore;
-    private int livesLeft;
-    private int hitTime;
+    private int livesLeft = 3;
+    private boolean isSnoozed = false;
+    private ImageView gameoverImage = DEF.IMVIEW.get("gameover");
+    private ImageView readyImage = DEF.IMVIEW.get("ready");
+    private long snoozingStart;
+    private double snoozeRemaining;
+    
 
     // game flags
     private boolean CLICKED, GAME_START, GAME_OVER, HIT_PIPE_OR_PIG;
@@ -87,7 +97,7 @@ public class AngryFlappyBird extends Application {
     private void resetGameControl() {      
         DEF.startButton.setOnMouseClicked(this::mouseClickHandler);
         gameControl = new VBox(25);
-        gameControl.getChildren().addAll(DEF.startButton,DEF.listView,DEF.normalEggBox,DEF.snoozeEggBox,DEF.pigBox); 
+        gameControl.getChildren().addAll(DEF.startButton,DEF.listView,DEF.peachBox,DEF.snoozeEggBox,DEF.breadBox); 
     }
     
     private void mouseClickHandler(MouseEvent e) {
@@ -104,142 +114,145 @@ public class AngryFlappyBird extends Application {
         }
     }
     
-    /**
-     * 
-     */
-    public void gameLoop() {
-        if (livesLeft < 0) {
-            resetGameScene(false);
-            totalScore = 0;
-            livesLeft = 3;           
-        }
-        
-    }
-    
+ 
     private void resetGameScene(boolean firstEntry) {	
     	// reset variables        
         CLICKED = false;
         GAME_OVER = false;
         GAME_START = false;
+        HIT_PIPE_OR_PIG = false;
+        isSnoozed = false;
         floors = new ArrayList<>();
         pipeUps = new ArrayList<>();
         pipeDowns = new ArrayList<>();
-        pigs = new ArrayList<>();
-        HIT_PIPE_OR_PIG = false;
+        breads = new ArrayList<>();
+        peaches = new ArrayList<>();
+        eggs = new ArrayList<>();
         
         final ImageView[] backgrounds = new ImageView[]{
                 DEF.IMVIEW.get("backgroundDay"),
                 DEF.IMVIEW.get("backgroundAfternoon"),
                 DEF.IMVIEW.get("backgroundNight"),
-         };
-       
-    	if(firstEntry) {           
-    		// create two canvases
+         };      
+    	if(firstEntry) {
+    	    // create two canvases
             Canvas canvas = new Canvas(DEF.SCENE_WIDTH, DEF.SCENE_HEIGHT);
             gc = canvas.getGraphicsContext2D();
-
-            // create a background
-            ImageView background = DEF.IMVIEW.get("backgroundDay");
             
-            // create the game scene
+            ImageView readyImage = DEF.IMVIEW.get("ready");
+            readyImage.setX(DEF.SCENE_WIDTH / 2 - readyImage.getBoundsInLocal().getWidth() / 2);
+            readyImage.setY(DEF.SCENE_HEIGHT / 3);
+                   
             
+            // create the game scene            
             gameScene = new Group();
-            gameScene.getChildren().addAll(backgrounds[0], canvas, DEF.scoreText, DEF.livesText);
-            int[] currentBackgroundIndex = {0};
-            
-            Timeline timeline = new Timeline(
-                    new KeyFrame(Duration.seconds(15), event -> {
-                        gameScene.getChildren().clear();
-                        currentBackgroundIndex[0] = (currentBackgroundIndex[0] + 1) % backgrounds.length;
-                        gameScene.getChildren().addAll(backgrounds[currentBackgroundIndex[0]], canvas, DEF.scoreText, DEF.livesText);
-                    })            
-            );
-            timeline.setCycleCount(Timeline.INDEFINITE);
-            timeline.play();          
-    	}
-    	
+            gameScene.getChildren().addAll(backgrounds[0], canvas, readyImage, DEF.scoreText, DEF.livesText);            
+            DEF.startButton.setOnAction(event -> {
+                gameScene.getChildren().remove(readyImage);
+            });
+
+                int[] currentBackgroundIndex = {0};            
+                Timeline timeline = new Timeline(
+                        new KeyFrame(Duration.seconds(10), event -> {
+                            gameScene.getChildren().clear();
+                            currentBackgroundIndex[0] = (currentBackgroundIndex[0] + 1) % backgrounds.length;
+                            gameScene.getChildren().addAll(backgrounds[currentBackgroundIndex[0]], canvas, DEF.scoreText, DEF.livesText);
+                                                    
+                        })            
+                );
+                timeline.setCycleCount(Timeline.INDEFINITE);
+                timeline.play();              
+                   
+        }  	
     	// initialize floor
-    	for(int i=0; i<DEF.FLOOR_COUNT; i++) {
-    		
+    	for(int i=0; i<DEF.FLOOR_COUNT; i++) {   		
     		int posX = i * DEF.FLOOR_WIDTH;
-    		int posY = DEF.SCENE_HEIGHT - DEF.FLOOR_HEIGHT;
-    		
+    		int posY = DEF.SCENE_HEIGHT - DEF.FLOOR_HEIGHT;   		
     		Sprite floor = new Sprite(posX, posY, DEF.IMAGE.get("floor"));
     		floor.setVelocity(DEF.SCENE_SHIFT_INCR, 0);
-    		floor.render(gc);
-    		
+    		floor.render(gc);    		
     		floors.add(floor);
     	}
         
         // initialize blob
-        blob = new Sprite(DEF.BLOB_POS_X, DEF.BLOB_POS_Y,DEF.IMAGE.get("blob0"));
+        blob = new Sprite(DEF.BLOB_POS_X, DEF.BLOB_POS_Y,DEF.IMAGE.get("kiki01"));
         blob.render(gc);
         
         // initialize pipeUp  
         Random ran = new Random();
-        int prePosUpX = 0;
+        Sprite pipeUpCopy = new Sprite(0, 0, DEF.IMAGE.get("pipeflap2"));
         for (int i = 0; i < DEF.PIPE_COUNT; i++) {
-            int PIPEUP_POS_X = ran.nextInt((i+1)*150, (i+2)*150);
-            if (PIPEUP_POS_X - prePosUpX <= 100) {
-                PIPEUP_POS_X += ran.nextInt(80, 150);
-            }
-            prePosUpX = PIPEUP_POS_X;
-            int PIPEUP_POS_Y = ran.nextInt(-20, 0);
-
+            int PIPEUP_POS_X = ran.nextInt((i+1)*250, (i+2)*250);
+            int PIPEUP_POS_Y = ran.nextInt(-40, -30);            
             Sprite pipeUp = new Sprite(PIPEUP_POS_X, PIPEUP_POS_Y, DEF.IMAGE.get("pipeflap2"));
+            if (pipeUpCopy.intersectsSprite(pipeUp)) {
+                pipeUp = new Sprite(PIPEUP_POS_X + 100, PIPEUP_POS_Y, DEF.IMAGE.get("pipeflap2"));
+            }
+            pipeUpCopy = pipeUp;
             pipeUp.setVelocity(DEF.SCENE_SHIFT_INCR, 0);
-            pipeUp.render(gc);
-
+            pipeUp.render(gc);         
             pipeUps.add(pipeUp);
         }   
         
         // initialize pipeDown
-        int prePosDownX = 0;
+        Sprite pipeDownCopy = new Sprite(0, 0, DEF.IMAGE.get("pipeflap"));
         for (int i = 0; i < DEF.PIPE_COUNT; i++) {
-            int PIPEDOWN_POS_X = ran.nextInt((i+1)*150, (i+2)*150);
-            if (PIPEDOWN_POS_X - prePosDownX <= 100) {
-                PIPEDOWN_POS_X += ran.nextInt(80, 150);
-            }
-                prePosDownX = PIPEDOWN_POS_X;         
-            int PIPEDOWN_POS_Y = ran.nextInt(380, 400);               
+            int PIPEDOWN_POS_X = ran.nextInt((i+1)*250, (i+2)*250);      
+            int PIPEDOWN_POS_Y = ran.nextInt(430, 450);   
             Sprite pipeDown = new Sprite(PIPEDOWN_POS_X, PIPEDOWN_POS_Y, DEF.IMAGE.get("pipeflap"));
+            if (pipeDownCopy.intersectsSprite(pipeDown)) {
+                pipeDown = new Sprite(PIPEDOWN_POS_X + 100, PIPEDOWN_POS_Y, DEF.IMAGE.get("pipeflap"));
+            }
+            pipeDownCopy = pipeDown;
             pipeDown.setVelocity(DEF.SCENE_SHIFT_INCR, 0);
-            pipeDown.render(gc);
-          
+            pipeDown.render(gc);    
+
             pipeDowns.add(pipeDown);
         }      
         
-        // initialize pigs
+        // initialize bread
         for (int i=0; i < pipeUps.size(); i++) {
-            // make pig
-            Sprite pig = new Sprite();
-            // for one pipe, actually make one
+            Sprite bread = new Sprite();
             if(i%2==0) {
-                double pigPosX = pipeUps.get(i).getPositionX();
-                double pigPosY = pipeUps.get(i).getPositionY();
-                pig.setPositionXY(pigPosX, pigPosY);
-                pig.setImage(DEF.IMAGE.get("pig"));
-                pig.setVelocity(DEF.SCENE_SHIFT_INCR, DEF.PIG_VELOCITY);
-            }
-            //else pig will effectively not exist in-game but will exist in the pig list
-
-            
-            //render pig
-            pig.render(gc);
-            
-            //add to pig array list
-            pigs.add(pig);
+                double breadPosX = pipeUps.get(i).getPositionX();
+                double breadPosY = pipeUps.get(i).getPositionY();
+                bread.setPositionXY(breadPosX, breadPosY);
+                bread.setImage(DEF.IMAGE.get("bread"));
+                bread.setVelocity(DEF.SCENE_SHIFT_INCR, DEF.GODMOTHER_VELOCITY);
+            }    
+            bread.render(gc);           
+            breads.add(bread);
         }
         
+        // initialize egg and peach
+        for (int i=0; i < pipeDowns.size() ; i++) {
+            int ranValue = ran.nextInt(2);
+            Sprite peach = new Sprite();
+            Sprite egg = new Sprite();
+            double eggPosX = pipeDowns.get(i).getPositionX();
+            double eggPosY = pipeDowns.get(i).getPositionY() - 80;
+            if (i == 0) {                
+                peach.setPositionXY(eggPosX, eggPosY);
+                peach.setImage(DEF.IMAGE.get("peach"));
+                peach.setVelocity(DEF.SCENE_SHIFT_INCR, 0);
+            }
+            else if (ranValue == 0){
+                egg.setPositionXY(eggPosX, eggPosY);
+                egg.setImage(DEF.IMAGE.get("egg"));
+                egg.setVelocity(DEF.SCENE_SHIFT_INCR, 0);
+            } 
+            peach.render(gc);  
+            egg.render(gc);
+            peaches.add(peach);
+            eggs.add(egg);
+        }
         // initialize timer
         startTime = System.nanoTime();
         timer = new MyTimer();
         timer.start();  
-        
-        
 
     }
-
+    
     //timer stuff
     class MyTimer extends AnimationTimer { 	
     	int counter = 0;  	
@@ -250,22 +263,30 @@ public class AngryFlappyBird extends Application {
     	     startTime = now;
     	     
     	     // clear current scene
-    	     gc.clearRect(0, 0, DEF.SCENE_WIDTH, DEF.SCENE_HEIGHT);
-
+    	     gc.clearRect(0, 0, DEF.SCENE_WIDTH, DEF.SCENE_HEIGHT);   	     
+    	     
     	     if (GAME_START) {
     	    	 // step1: update non-player objects
     	    	 moveFloor();
     	    	 movePipeUp();
-                 movePipeDown();
-                 movePigs();
-    	    	 // step2: update blob
-    	    	 moveBlob();
+             movePipeDown();
+             moveBread();
+             // step2: update blob
+    	    	 moveBlob();   
     	    	 // step3: check for extras
     	    	 checkCollision();
-    	    	 passPipeEffect();	
-    	     }
-    	 }
-    	 
+    	    	 passPipeEffect();	 	    	  	    	   
+    	     }      	     
+    	     if (isSnoozed) {
+                 double snoozeTime = (System.nanoTime() - snoozingStart)*DEF.NANOSEC_TO_SEC;
+                 snoozeRemaining = (7-snoozeTime);
+                 DEF.snoozeTime.setText(String.valueOf((int)snoozeRemaining) + " secs to go"); 
+                 if ((int)(snoozeRemaining) <= 0) {
+                     isSnoozed = false;
+                     gameScene.getChildren().remove(DEF.snoozeTime);
+                 }
+               }    	     
+    	 }    	 
     	 // step1: update floor
     	 private void moveFloor() {            
              for(int i=0; i<DEF.FLOOR_COUNT; i++) {
@@ -277,19 +298,31 @@ public class AngryFlappyBird extends Application {
                  floors.get(i).render(gc);
                  floors.get(i).update(DEF.SCENE_SHIFT_TIME);
              }
-          }
-    	 
+          }   	
+
     	 // step2: update blob
-    	 private void moveBlob() {
-    		 
+    	 private void moveBlob() {  	
 			long diffTime = System.nanoTime() - clickTime;
 			
-			// blob flies upward with animation
-			if (CLICKED && diffTime <= DEF.BLOB_DROP_TIME) {
-				
+			if (isSnoozed) {	            
+			    blob.setPositionXY(80, 150);
+                blob.setImage(DEF.IMAGE.get("kiki01"));
+                blob.setVelocity(DEF.SNOOZEDFAIRY_VELOCITY, DEF.SCENE_SHIFT_INCR);              
+              if (!gameScene.getChildren().contains(DEF.snoozeTime)) {
+                  gameScene.getChildren().add(DEF.snoozeTime);
+              }              
+              Timeline snoozeTimeline = new Timeline(
+                      new KeyFrame(Duration.seconds(6), event -> {
+                          isSnoozed = false;
+                      })
+                  );
+                snoozeTimeline.play();              
+			}
+			else if (!CLICKED && diffTime <= DEF.BLOB_DROP_TIME) {		
+
 				int imageIndex = Math.floorDiv(counter++, DEF.BLOB_IMG_PERIOD);
 				imageIndex = Math.floorMod(imageIndex, DEF.BLOB_IMG_LEN);
-				blob.setImage(DEF.IMAGE.get("blob"+String.valueOf(imageIndex)));
+				blob.setImage(DEF.IMAGE.get("kiki0"+String.valueOf(imageIndex+1)));
 				blob.setVelocity(0, DEF.BLOB_FLY_VEL);
 			}
 			// blob drops after a period of time without button click if haven't hit pipe or pig
@@ -301,43 +334,69 @@ public class AngryFlappyBird extends Application {
 			// render blob on GUI
 			blob.update(elapsedTime * DEF.NANOSEC_TO_SEC);
 			blob.render(gc);
-    	 }
-    	 
-    	 // step 3: update pipe
-    	 private void movePipeUp() {   
-             Random ran = new Random();             
+    	 }  
+    	   	
+    	 // step 3: update pipeUp
+    	 private void movePipeUp() {
+             Random ran = new Random(); 
+             int ranValue = ran.nextInt(2);
     	     for(int i=0; i<pipeUps.size(); i++) {   
     	         if (pipeUps.get(i).getPositionX() <= -DEF.PIPE_WIDTH) { 
                          double nextX = pipeUps.get((i+1)%DEF.PIPE_COUNT).getPositionX() + ran.nextInt(250,300);
-                         double nextY = ran.nextInt(-40, 0);
+                         double nextY = ran.nextInt(-40, -20);
                          pipeUps.get(i).setPositionXY(nextX, nextY);
-                         pipeUps.get(i).setNotPassed(pipeUps.get(i));                            
-                 }
+                         pipeUps.get(i).setNotPassed(pipeUps.get(i));  
+                         
+                         if (isSnoozed) {
+                             pipeUps.get(i).setPositionXY(1000, pipeUps.get(i).getPositionY());
+                             
+                         }
+                 }    	         
     	         pipeUps.get(i).render(gc);
     	         pipeUps.get(i).update(DEF.SCENE_SHIFT_TIME);      
-    	      }      	         
+    	         
+    	      }    
     	 }
-    	 
+    	 // step 4: update pipeDown and randomize peach
     	 private void movePipeDown() {   
-             Random ran = new Random();             
+             Random ran = new Random(); 
+             int ranValue = ran.nextInt(10);
              for(int i=0; i<pipeDowns.size(); i++) {   
                  if (pipeDowns.get(i).getPositionX() <= -DEF.PIPE_WIDTH) { 
-                         double nextX = pipeDowns.get((i+1)%DEF.PIPE_COUNT).getPositionX() + ran.nextInt(250,300);
-                         double nextY = ran.nextInt(380, 420);
+                         double nextX = pipeDowns.get((i+1)%DEF.PIPE_COUNT).getPositionX() + 400;
+                         double nextY = ran.nextInt(420, 450);
                          pipeDowns.get(i).setPositionXY(nextX, nextY);
-                         pipeDowns.get(i).setNotPassed(pipeDowns.get(i));                            
+                         pipeDowns.get(i).setNotPassed(pipeDowns.get(i));   
+                         if (ranValue % 2 == 0 | ranValue % 5 == 0) {
+                             peaches.get(i).setPositionXY(nextX, nextY - 80);
+                             peaches.get(i).setImage(DEF.IMAGE.get("peach"));
+                             peaches.get(i).setNotPassed(peaches.get(i));  
+                         }
+                         if (ranValue % 3 == 0) {
+                             eggs.get(i).setPositionXY(nextX, nextY - 80);
+                         }
+                         if (isSnoozed) {
+                             pipeDowns.get(i).setPositionXY(1000, pipeDowns.get(i).getPositionY());
+                             peaches.get(i).setPositionXY(1000, peaches.get(i).getPositionY());
+                             eggs.get(i).setPositionXY(1000, eggs.get(i).getPositionY());
+                         }
                  }
                  pipeDowns.get(i).render(gc);
-                 pipeDowns.get(i).update(DEF.SCENE_SHIFT_TIME);      
+                 pipeDowns.get(i).update(DEF.SCENE_SHIFT_TIME);    
+                 peaches.get(i).render(gc);
+                 peaches.get(i).update(DEF.SCENE_SHIFT_TIME);
+                 eggs.get(i).render(gc);
+                 eggs.get(i).update(DEF.SCENE_SHIFT_TIME);                                      
               }                  
+
          }
     	 
-    	 // update pigs
-    	 private void movePigs() {             
-             for(int i=0; i<pigs.size(); i++) {
+    	 //  step 5: update bread
+    	 private void moveBread() {             
+             for(int i=0; i<breads.size(); i++) {
                  Random ran = new Random();
                  double waitDistance = ran.nextInt(200,2000);
-                 if (pigs.get(i).getPositionX() <= -waitDistance && !HIT_PIPE_OR_PIG) {
+                 if (breads.get(i).getPositionX() <= -waitDistance && !HIT_PIPE_OR_PIG) {
                      //get X position from farthest pipe
                      double nextX = 0;
                      for (int j=0; j<pipeUps.size(); j++){
@@ -346,44 +405,53 @@ public class AngryFlappyBird extends Application {
                          }
                      }
                      double nextY = 0;
-                     pigs.get(i).setPositionXY(nextX, nextY);
-                     pigs.get(i).setNotPassed(pigs.get(i));                            
+                     breads.get(i).setPositionXY(nextX, nextY);
+                     breads.get(i).setNotPassed(breads.get(i));                            
                  }
-                 pigs.get(i).render(gc);
-                 pigs.get(i).update(DEF.SCENE_SHIFT_TIME);      
+                 breads.get(i).render(gc);
+                 breads.get(i).update(DEF.SCENE_SHIFT_TIME);      
               }                  
-         }
-    	 
-    	 
-    	 public void checkCollision() { 
-
-    	     
-             // check collision                  
-             for (Sprite floor: floors) {
-                 GAME_OVER = GAME_OVER || blob.intersectsSprite(floor);
-                 if (blob.intersectsSprite(floor)) {
-                     SCORE.updateLivesText(DEF.livesText, livesLeft--);
-                     livesLeft--;         
+         }	 
+         
+    	 public void checkCollision() {   	
+    	     ImageView gameoverImage = DEF.IMVIEW.get("gameover");
+             gameoverImage.setX(DEF.SCENE_WIDTH / 2 - gameoverImage.getBoundsInLocal().getWidth() / 2);
+             gameoverImage.setY(DEF.SCENE_HEIGHT / 3);
+    		  // check collision                  
+    	    if (!isSnoozed) {
+    	        for (Sprite floor: floors) {
+                  GAME_OVER = GAME_OVER || blob.intersectsSprite(floor);
+                  if (blob.intersectsSprite(floor)) {
+                      livesLeft--;           
+                      SCORE.updateLivesText(DEF.livesText, livesLeft);
+                   }
+              }                
+              for (Sprite pipe : pipeUps) {
+                  if (blob.intersectsSprite(pipe)) {
+                      livesLeft--;           
+                      SCORE.updateLivesText(DEF.livesText, livesLeft);
+                      HIT_PIPE_OR_PIG = true;
+                   }
+              }               
+              for (Sprite pipe : pipeDowns) {
+                  if (blob.intersectsSprite(pipe)) {
+                      livesLeft--;
+                      SCORE.updateLivesText(DEF.livesText, livesLeft);
+                      HIT_PIPE_OR_PIG = true;
+                   }            
+               }           
+               for (Sprite peach : peaches) {
+                  if (blob.intersectsSprite(peach) && !peach.isPassed()) {
+                      peach.setVisible(false);
+                      SCORE.updateScoreText(DEF.scoreText, totalScore++);
+                      peach.setPassed(peach);
+                      sound.play("point.mp3");
+                      break;
                   }
-             }
-             
-             for (Sprite pipe : pipeUps) {
-                 if (blob.intersectsSprite(pipe)) {
-                     livesLeft--;           
-                     SCORE.updateLivesText(DEF.livesText, livesLeft--);
-                     HIT_PIPE_OR_PIG = true;
-                     }
-             }
-             
-             for (Sprite pipe : pipeDowns) {
-                 if (blob.intersectsSprite(pipe)) {
-                     livesLeft--;
-                     SCORE.updateLivesText(DEF.livesText, livesLeft);
-                     HIT_PIPE_OR_PIG = true;
-                 }
-             }   
-             for (Sprite pig : pigs) {
-                 if (blob.intersectsSprite(pig)) {
+               }
+               
+               for (Sprite bread : breads) {
+                 if (blob.intersectsSprite(bread)) {
                      sound.play("pig_sound.mp3");
                      livesLeft--;
                      SCORE.updateLivesText(DEF.livesText, livesLeft);
@@ -391,42 +459,30 @@ public class AngryFlappyBird extends Application {
                      HIT_PIPE_OR_PIG = true;
                  }
              }
-             
-             // if bird hits pig or pipe, bounce and wait to hit floor
+               
+             // if bird hits bread or pipe, bounce and wait to hit floor
              if(HIT_PIPE_OR_PIG) {
                  blob.setVelocity(DEF.BLOB_FLY_BACK_VEL, DEF.BLOB_DROP_VEL); 
                  stopMotion();
              }
-             
-             // end the game when blob hit stuff
-             if (GAME_OVER) {
-                 showHitEffect(); 
-                 stopMotion();
-                 timer.stop();
-             }               
-          }
-    	 
-    	
-    	// show 
-    	private void passPipeEffect() {
-    	    for (Sprite pipe : pipeUps) {
-                if (blob.getPositionX() > pipe.getPositionX() && !pipe.isPassed()) {
-                    SCORE.updateScoreText(DEF.scoreText, totalScore++);
-                    pipe.setPassed(pipe);
-                    sound.play("point.mp3");
-                    break; 
-                }
-            }
-    	    for (Sprite pipe : pipeDowns) {
-                if (blob.getPositionX() > pipe.getPositionX() && !pipe.isPassed()) {
-                    SCORE.updateScoreText(DEF.scoreText, totalScore++);
-                    pipe.setPassed(pipe);
-                    sound.play("point.mp3");
-                    break; 
-                }
-            }
-    	}
-    	
+           }
+      // end the game when blob hit stuff
+        if (GAME_OVER) {
+          showHitEffect(); 
+          stopMotion();
+          gameScene.getChildren().add(gameoverImage); 
+          DEF.startButton.setOnAction(event -> {
+              gameScene.getChildren().remove(gameoverImage);
+          });
+          timer.stop();
+        }
+
+        if (livesLeft <= 0) {
+            livesLeft = 3;
+            SCORE.updateLivesText(DEF.livesText, livesLeft);
+        }
+  }  	 
+	
     	private void stopMotion() {
     	    for (Sprite floor: floors) {
                 floor.setVelocity(0, 0);
@@ -437,18 +493,41 @@ public class AngryFlappyBird extends Application {
     	    for (Sprite pipe: pipeDowns) {
                 pipe.setVelocity(0, 0);
             }
-    	    for (Sprite pig: pigs) {
-                pig.setVelocity(0, 0);
+    	    for (Sprite bread: breads) {
+                bread.setVelocity(0, 0);
+            }
+          for (Sprite peach: peaches) {
+                peach.setVelocity(0, 0);
             }
     	}
-
+      	     	
+    	// show 
+    	private void passPipeEffect() {
+    	    if (!isSnoozed) {
+    	        for (Sprite pipe : pipeUps) {
+                    if (blob.getPositionX() > pipe.getPositionX() && !pipe.isPassed()) {
+                        SCORE.updateScoreText(DEF.scoreText, totalScore++);
+                        pipe.setPassed(pipe);
+                        sound.play("point.mp3");
+                        break; 
+                    }
+              }
+              for (Sprite pipe : pipeDowns) {
+                  if (blob.getPositionX() > pipe.getPositionX() && !pipe.isPassed()) {
+                      SCORE.updateScoreText(DEF.scoreText, totalScore++);
+                      pipe.setPassed(pipe);
+                      sound.play("point.mp3");
+                      break; 
+                  }
+              }                
+    	    }
+    	}    	 
         private void showHitEffect() {
 	        ParallelTransition parallelTransition = new ParallelTransition();
 	        FadeTransition fadeTransition = new FadeTransition(Duration.seconds(DEF.TRANSITION_TIME), gameScene);
 	        fadeTransition.setToValue(0);
 	        fadeTransition.setCycleCount(DEF.TRANSITION_CYCLE);
-	        fadeTransition.setAutoReverse(true);
-	        parallelTransition.getChildren().add(fadeTransition);
+	        fadeTransition.setAutoReverse(true);	        
 	        parallelTransition.play();
 	     }
     	 
