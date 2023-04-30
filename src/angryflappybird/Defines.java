@@ -29,6 +29,7 @@ public class Defines {
     final int BLOB_POS_Y = 200;
     final int BLOB_DROP_TIME = 300000000;  	// the elapsed time threshold before the blob starts dropping
     final int BLOB_DROP_VEL = 300;    		// the blob drop velocity
+    final int BLOB_FLY_BACK_VEL = -150;
     final int BLOB_FLY_VEL = -40;
     final int BLOB_IMG_LEN = 4;
     final int BLOB_IMG_PERIOD = 5;
