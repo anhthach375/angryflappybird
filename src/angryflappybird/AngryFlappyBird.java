@@ -29,8 +29,7 @@ import javafx.util.Duration;
 
 //The Application layer
 public class AngryFlappyBird extends Application {
-	
-	private Defines DEF = new Defines();
+    private Defines DEF = new Defines();
     private Sound sound = new Sound();
     private Score SCORE = new Score();
 
