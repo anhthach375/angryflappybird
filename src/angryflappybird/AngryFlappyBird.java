@@ -114,7 +114,6 @@ public class AngryFlappyBird extends Application {
         }
     }
     
- 
     private void resetGameScene(boolean firstEntry) {	
     	// reset variables        
         CLICKED = false;
@@ -267,8 +266,8 @@ public class AngryFlappyBird extends Application {
     	     
     	     if (GAME_START) {
     	    	 // step1: update non-player objects
-    	    	 moveFloor();
-    	    	 movePipeUp();
+    	     moveFloor();
+    	     movePipeUp();
              movePipeDown();
              moveBread();
              // step2: update blob
@@ -302,8 +301,7 @@ public class AngryFlappyBird extends Application {
 
     	 // step2: update blob
     	 private void moveBlob() {  	
-			long diffTime = System.nanoTime() - clickTime;
-			
+			long diffTime = System.nanoTime() - clickTime;			
 			if (isSnoozed) {	            
 			    blob.setPositionXY(80, 150);
                 blob.setImage(DEF.IMAGE.get("kiki01"));
@@ -440,6 +438,16 @@ public class AngryFlappyBird extends Application {
                       HIT_PIPE_OR_PIG = true;
                    }            
                }           
+              for (Sprite bread : breads) {
+                  if (blob.intersectsSprite(bread)) {
+                      sound.play("pig_sound.mp3");
+                      livesLeft--;
+                      SCORE.updateLivesText(DEF.livesText, livesLeft);
+                      SCORE.resetScoreText(DEF.scoreText);
+                      HIT_PIPE_OR_PIG = true;
+                  }
+              }
+                  
                for (Sprite peach : peaches) {
                   if (blob.intersectsSprite(peach) && !peach.isPassed()) {
                       peach.setVisible(false);
@@ -447,19 +455,17 @@ public class AngryFlappyBird extends Application {
                       peach.setPassed(peach);
                       sound.play("point.mp3");
                       break;
-                  }
-               }
-               
-               for (Sprite bread : breads) {
-                 if (blob.intersectsSprite(bread)) {
-                     sound.play("pig_sound.mp3");
-                     livesLeft--;
-                     SCORE.updateLivesText(DEF.livesText, livesLeft);
-                     SCORE.resetScoreText(DEF.scoreText);
-                     HIT_PIPE_OR_PIG = true;
-                 }
+                  }                                           
              }
-               
+               for (Sprite egg : eggs) {
+                   if (blob.intersectsSprite(egg) && !egg.isPassed()) {
+                       egg.setVisible(false);                  
+                       isSnoozed = true;
+                       egg.setPassed(egg);
+                       sound.play("snooze.mp3");
+                       snoozingStart = System.nanoTime();
+                   }              
+               }           
              // if bird hits bread or pipe, bounce and wait to hit floor
              if(HIT_PIPE_OR_PIG) {
                  blob.setVelocity(DEF.BLOB_FLY_BACK_VEL, DEF.BLOB_DROP_VEL); 
@@ -496,9 +502,13 @@ public class AngryFlappyBird extends Application {
     	    for (Sprite bread: breads) {
                 bread.setVelocity(0, 0);
             }
-          for (Sprite peach: peaches) {
+    	    for (Sprite peach: peaches) {
                 peach.setVelocity(0, 0);
             }
+    	    for (Sprite egg : eggs) {
+                egg.setVelocity(0, 0);
+    	    }
+    	     
     	}
       	     	
     	// show 
