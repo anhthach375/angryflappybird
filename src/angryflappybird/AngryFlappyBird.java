@@ -426,24 +426,21 @@ public class AngryFlappyBird extends Application {
               }                
               for (Sprite pipe : pipeUps) {
                   if (blob.intersectsSprite(pipe)) {
-                      livesLeft--;           
-                      SCORE.updateLivesText(DEF.livesText, livesLeft);
                       HIT_PIPE_OR_PIG = true;
                    }
               }               
               for (Sprite pipe : pipeDowns) {
                   if (blob.intersectsSprite(pipe)) {
-                      livesLeft--;
-                      SCORE.updateLivesText(DEF.livesText, livesLeft);
                       HIT_PIPE_OR_PIG = true;
                    }            
                }           
               for (Sprite bread : breads) {
                   if (blob.intersectsSprite(bread)) {
-                      sound.play("pig_sound.mp3");
-                      livesLeft--;
-                      SCORE.updateLivesText(DEF.livesText, livesLeft);
-                      SCORE.resetScoreText(DEF.scoreText);
+                      if (!HIT_PIPE_OR_PIG) {
+                          sound.play("pig_sound.mp3");
+                          totalScore = 0;
+                          SCORE.resetScoreText(DEF.scoreText);
+                      }
                       HIT_PIPE_OR_PIG = true;
                   }
               }
