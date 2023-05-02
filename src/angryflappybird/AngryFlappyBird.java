@@ -454,11 +454,13 @@ public class AngryFlappyBird extends Application {
              }
                for (Sprite egg : eggs) {
                    if (blob.intersectsSprite(egg) && !egg.isPassed()) {
-                       egg.setVisible(false);                  
-                       isSnoozed = true;
-                       egg.setPassed(egg);
-                       sound.play("snooze.mp3");
-                       snoozingStart = System.nanoTime();
+                       if (!HIT_PIPE_OR_PIG) {
+                           egg.setVisible(false);                  
+                           isSnoozed = true;
+                           egg.setPassed(egg);
+                           sound.play("snooze.mp3");
+                           snoozingStart = System.nanoTime();
+                       }
                    }              
                }           
              // if bird hits bread or pipe, bounce and wait to hit floor
@@ -479,6 +481,8 @@ public class AngryFlappyBird extends Application {
         }
 
         if (livesLeft <= 0) {
+            totalScore = 0;
+            SCORE.resetScoreText(DEF.scoreText);
             livesLeft = 3;
             SCORE.updateLivesText(DEF.livesText, livesLeft);
         }

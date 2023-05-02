@@ -34,7 +34,7 @@ public class Defines {
     final int BLOB_DROP_TIME = 300000000;  	// the elapsed time threshold before the blob starts dropping
     final int BLOB_FLY_BACK_VEL = -150;    // blob bounce back volocity
     final int BLOB_DROP_VEL = 200;    		// the blob drop velocity
-    final int BLOB_FLY_VEL = -40;
+    final int BLOB_FLY_VEL = -80;          // how far the blob goes up when clicked
     final int BLOB_IMG_LEN = 4;
     final int BLOB_IMG_PERIOD = 6;
     
