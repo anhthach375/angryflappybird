@@ -195,9 +195,11 @@ public class AngryFlappyBird extends Application {
         
         // initialize pipeDown
         Sprite pipeDownCopy = new Sprite(0, 0, DEF.IMAGE.get("pipeflap"));
-        for (int i = 0; i < DEF.PIPE_COUNT; i++) {
-            int PIPEDOWN_POS_X = ran.nextInt((i+1)*250, (i+2)*250);      
-            int PIPEDOWN_POS_Y = ran.nextInt(430, 450);   
+        for (int i = 0; i < pipeUps.size(); i++) {
+            double PIPEDOWN_POS_X = pipeUps.get(i).getPositionX();
+            double PIPEDOWN_POS_Y = pipeUps.get(i).getPositionY() + 480;
+            //int PIPEDOWN_POS_X = ran.nextInt((i+1)*250, (i+2)*250);      
+            //int PIPEDOWN_POS_Y = ran.nextInt(430, 450);   
             Sprite pipeDown = new Sprite(PIPEDOWN_POS_X, PIPEDOWN_POS_Y, DEF.IMAGE.get("pipeflap"));
             if (pipeDownCopy.intersectsSprite(pipeDown)) {
                 pipeDown = new Sprite(PIPEDOWN_POS_X + 150, PIPEDOWN_POS_Y, DEF.IMAGE.get("pipeflap"));
@@ -217,7 +219,7 @@ public class AngryFlappyBird extends Application {
                 double breadPosY = pipeUps.get(i).getPositionY();
                 bread.setPositionXY(breadPosX, breadPosY);
                 bread.setImage(DEF.IMAGE.get("bread"));
-                bread.setVelocity(DEF.SCENE_SHIFT_INCR, DEF.GODMOTHER_VELOCITY);
+                bread.setVelocity(DEF.SCENE_SHIFT_INCR, DEF.BREAD_VELOCITY);
             }    
             bread.render(gc);           
             breads.add(bread);
@@ -264,12 +266,11 @@ public class AngryFlappyBird extends Application {
     	     gc.clearRect(0, 0, DEF.SCENE_WIDTH, DEF.SCENE_HEIGHT);   	     
     	     
     	     if (GAME_START) {
-    	    	 // step1: update non-player objects
-    	     moveFloor();
-    	     movePipeUp();
-             movePipeDown();
-             moveBread();
-             // step2: update blob
+        	     // step1: update non-player objects
+        	     moveFloor();
+        	     movePipesandPeaches();
+                 moveBread();
+                 // step2: update blob
     	    	 moveBlob();   
     	    	 // step3: check for extras
     	    	 checkCollision();
@@ -333,52 +334,39 @@ public class AngryFlappyBird extends Application {
 			blob.render(gc);
     	 }  
     	   	
-    	 // step 3: update pipeUp
-    	 private void movePipeUp() {
-             Random ran = new Random(); 
-             int ranValue = ran.nextInt(2);
-    	     for(int i=0; i<pipeUps.size(); i++) {   
-    	         if (pipeUps.get(i).getPositionX() <= -DEF.PIPE_WIDTH) { 
-                         double nextX = pipeUps.get((i+1)%DEF.PIPE_COUNT).getPositionX() + ran.nextInt(250,300);
-                         double nextY = ran.nextInt(-40, -20);
-                         pipeUps.get(i).setPositionXY(nextX, nextY);
-                         pipeUps.get(i).setNotPassed(pipeUps.get(i));                          
-                         if (isSnoozed) {
-                             pipeUps.get(i).setPositionXY(1000, pipeUps.get(i).getPositionY());                            
-                         }
-                 }    	         
-    	         pipeUps.get(i).render(gc);
-    	         pipeUps.get(i).update(DEF.SCENE_SHIFT_TIME);      
-    	         
-    	      }    
-    	 }
-    	 // step 4: update pipeDown and randomize peach
-    	 private void movePipeDown() {   
+    	 // step 3: update pipes and randomize peach
+    	 private void movePipesandPeaches() {   
              Random ran = new Random(); 
              int ranValue = ran.nextInt(10);
              for(int i=0; i<pipeDowns.size(); i++) {   
                  if (pipeDowns.get(i).getPositionX() <= -DEF.PIPE_WIDTH) { 
                          double nextX = pipeDowns.get((i+1)%DEF.PIPE_COUNT).getPositionX() + 400;
-                         double nextY = ran.nextInt(420, 450);
-                         pipeDowns.get(i).setPositionXY(nextX, nextY);
-                         pipeDowns.get(i).setNotPassed(pipeDowns.get(i));  
+                         double nextY_down = ran.nextInt(420, 450);
+                         double nextY_up = nextY_down - 480;
+                         pipeDowns.get(i).setPositionXY(nextX, nextY_down);
+                         pipeDowns.get(i).setNotPassed(pipeDowns.get(i)); 
+                         pipeUps.get(i).setPositionXY(nextX, nextY_up);
+                         pipeUps.get(i).setNotPassed(pipeUps.get(i));
                          if (isSnoozed) {
                              pipeDowns.get(i).setPositionXY(1000, pipeDowns.get(i).getPositionY());
+                             pipeUps.get(i).setPositionXY(1000, pipeUps.get(i).getPositionY());
                              peaches.get(i).setPositionXY(1000, peaches.get(i).getPositionY());
                              eggs.get(i).setPositionXY(1000, eggs.get(i).getPositionY());
                          }
                          if (ranValue % 2 == 0 | ranValue % 5 == 0) {
-                             peaches.get(i).setPositionXY(nextX, nextY - 80);
+                             peaches.get(i).setPositionXY(nextX, nextY_down - 80);
                              peaches.get(i).setImage(DEF.IMAGE.get("peach"));
                              peaches.get(i).setNotPassed(peaches.get(i));  
                          }
                          if (ranValue % 3 == 0) {
-                             eggs.get(i).setPositionXY(nextX, nextY - 80);
+                             eggs.get(i).setPositionXY(nextX, nextY_down - 80);
                          }
                          
                  }
                  pipeDowns.get(i).render(gc);
-                 pipeDowns.get(i).update(DEF.SCENE_SHIFT_TIME);    
+                 pipeDowns.get(i).update(DEF.SCENE_SHIFT_TIME);
+                 pipeUps.get(i).render(gc);
+                 pipeUps.get(i).update(DEF.SCENE_SHIFT_TIME);
                  peaches.get(i).render(gc);
                  peaches.get(i).update(DEF.SCENE_SHIFT_TIME);
                  eggs.get(i).render(gc);
@@ -387,7 +375,7 @@ public class AngryFlappyBird extends Application {
 
          }
     	 
-    	 //  step 5: update bread
+    	 //  step 4: update bread
     	 private void moveBread() {             
              for(int i=0; i<breads.size(); i++) {
                  Random ran = new Random();

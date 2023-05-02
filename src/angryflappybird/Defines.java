@@ -55,10 +55,10 @@ public class Defines {
     int PIPE_HEIGHT = 200;   
     final int PIPE_COUNT = 2; 
     
-    // coefficients related to the godmother
-    final int GODMOTHER_WIDTH = 60;
-    final int GODMOTHER_HEIGHT = 60;
-    final double GODMOTHER_VELOCITY = 0.2;
+    // coefficients related to the bread
+    final int BREAD_WIDTH = 60;
+    final int BREAD_HEIGHT = 60;
+    final double BREAD_VELOCITY = 0.2;
     
     // coefficients related to the eggs and peach
     final int EGG_WIDTH = 80;
@@ -111,7 +111,7 @@ public class Defines {
 	             img = new Image(pathImage(IMAGE_FILES[i]), PIPE_WIDTH, PIPE_HEIGHT, false, false);
 			}
 			else if (i == 10) {
-	              img = new Image(pathImage(IMAGE_FILES[i]), GODMOTHER_WIDTH, GODMOTHER_HEIGHT, false, false);
+	              img = new Image(pathImage(IMAGE_FILES[i]), BREAD_WIDTH, BREAD_HEIGHT, false, false);
 			}
 			else if (i == 11 | i == 12) {
 	               img = new Image(pathImage(IMAGE_FILES[i]), EGG_WIDTH, EGG_HEIGHT, false, false);
@@ -152,14 +152,13 @@ public class Defines {
         snoozeEggBox.getChildren().add(IMVIEW.get("egg"));
         snoozeEggBox.getChildren().add(new Text ("Lets you snooze"));
 	    
-        // initialize the snooze egg's description
+        // initialize the bread egg's description
         breadBox = new HBox();
         breadBox.getChildren().add(IMVIEW.get("bread"));
         breadBox.getChildren().add(new Text ("Avoid bread"));
         
         // initialize the score
         scoreText.setStyle("-fx-font-size: 50;");
-//        scoreText.setFont(Font.font(font, FontWeight.EXTRA_BOLD, 50));
         scoreText.setFill(javafx.scene.paint.Color.WHITE);
         scoreText.setLayoutX(20);
         scoreText.setLayoutY(50);
