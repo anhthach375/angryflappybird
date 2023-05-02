@@ -27,8 +27,8 @@ public class Defines {
     final int OVER_HEIGHT = 300;
 
     // coefficients related to the blob
-    final int BLOB_WIDTH = 130;
-    final int BLOB_HEIGHT = 130;
+    final int BLOB_WIDTH = 110;
+    final int BLOB_HEIGHT = 70;
     final int BLOB_POS_X = 30;
     final int BLOB_POS_Y = 10;
     final int BLOB_DROP_TIME = 300000000;  	// the elapsed time threshold before the blob starts dropping

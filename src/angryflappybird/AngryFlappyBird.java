@@ -185,7 +185,7 @@ public class AngryFlappyBird extends Application {
             int PIPEUP_POS_Y = ran.nextInt(-40, -30);            
             Sprite pipeUp = new Sprite(PIPEUP_POS_X, PIPEUP_POS_Y, DEF.IMAGE.get("pipeflap2"));
             if (pipeUpCopy.intersectsSprite(pipeUp)) {
-                pipeUp = new Sprite(PIPEUP_POS_X + 100, PIPEUP_POS_Y, DEF.IMAGE.get("pipeflap2"));
+                pipeUp = new Sprite(PIPEUP_POS_X + 150, PIPEUP_POS_Y, DEF.IMAGE.get("pipeflap2"));
             }
             pipeUpCopy = pipeUp;
             pipeUp.setVelocity(DEF.SCENE_SHIFT_INCR, 0);
@@ -200,7 +200,7 @@ public class AngryFlappyBird extends Application {
             int PIPEDOWN_POS_Y = ran.nextInt(430, 450);   
             Sprite pipeDown = new Sprite(PIPEDOWN_POS_X, PIPEDOWN_POS_Y, DEF.IMAGE.get("pipeflap"));
             if (pipeDownCopy.intersectsSprite(pipeDown)) {
-                pipeDown = new Sprite(PIPEDOWN_POS_X + 100, PIPEDOWN_POS_Y, DEF.IMAGE.get("pipeflap"));
+                pipeDown = new Sprite(PIPEDOWN_POS_X + 150, PIPEDOWN_POS_Y, DEF.IMAGE.get("pipeflap"));
             }
             pipeDownCopy = pipeDown;
             pipeDown.setVelocity(DEF.SCENE_SHIFT_INCR, 0);
@@ -225,7 +225,6 @@ public class AngryFlappyBird extends Application {
         
         // initialize egg and peach
         for (int i=0; i < pipeDowns.size() ; i++) {
-            int ranValue = ran.nextInt(2);
             Sprite peach = new Sprite();
             Sprite egg = new Sprite();
             double eggPosX = pipeDowns.get(i).getPositionX();
@@ -235,7 +234,7 @@ public class AngryFlappyBird extends Application {
                 peach.setImage(DEF.IMAGE.get("peach"));
                 peach.setVelocity(DEF.SCENE_SHIFT_INCR, 0);
             }
-            else if (ranValue == 0){
+            else {
                 egg.setPositionXY(eggPosX, eggPosY);
                 egg.setImage(DEF.IMAGE.get("egg"));
                 egg.setVelocity(DEF.SCENE_SHIFT_INCR, 0);
@@ -343,11 +342,9 @@ public class AngryFlappyBird extends Application {
                          double nextX = pipeUps.get((i+1)%DEF.PIPE_COUNT).getPositionX() + ran.nextInt(250,300);
                          double nextY = ran.nextInt(-40, -20);
                          pipeUps.get(i).setPositionXY(nextX, nextY);
-                         pipeUps.get(i).setNotPassed(pipeUps.get(i));  
-                         
+                         pipeUps.get(i).setNotPassed(pipeUps.get(i));                          
                          if (isSnoozed) {
-                             pipeUps.get(i).setPositionXY(1000, pipeUps.get(i).getPositionY());
-                             
+                             pipeUps.get(i).setPositionXY(1000, pipeUps.get(i).getPositionY());                            
                          }
                  }    	         
     	         pipeUps.get(i).render(gc);
@@ -364,7 +361,12 @@ public class AngryFlappyBird extends Application {
                          double nextX = pipeDowns.get((i+1)%DEF.PIPE_COUNT).getPositionX() + 400;
                          double nextY = ran.nextInt(420, 450);
                          pipeDowns.get(i).setPositionXY(nextX, nextY);
-                         pipeDowns.get(i).setNotPassed(pipeDowns.get(i));   
+                         pipeDowns.get(i).setNotPassed(pipeDowns.get(i));  
+                         if (isSnoozed) {
+                             pipeDowns.get(i).setPositionXY(1000, pipeDowns.get(i).getPositionY());
+                             peaches.get(i).setPositionXY(1000, peaches.get(i).getPositionY());
+                             eggs.get(i).setPositionXY(1000, eggs.get(i).getPositionY());
+                         }
                          if (ranValue % 2 == 0 | ranValue % 5 == 0) {
                              peaches.get(i).setPositionXY(nextX, nextY - 80);
                              peaches.get(i).setImage(DEF.IMAGE.get("peach"));
@@ -373,11 +375,7 @@ public class AngryFlappyBird extends Application {
                          if (ranValue % 3 == 0) {
                              eggs.get(i).setPositionXY(nextX, nextY - 80);
                          }
-                         if (isSnoozed) {
-                             pipeDowns.get(i).setPositionXY(1000, pipeDowns.get(i).getPositionY());
-                             peaches.get(i).setPositionXY(1000, peaches.get(i).getPositionY());
-                             eggs.get(i).setPositionXY(1000, eggs.get(i).getPositionY());
-                         }
+                         
                  }
                  pipeDowns.get(i).render(gc);
                  pipeDowns.get(i).update(DEF.SCENE_SHIFT_TIME);    
@@ -507,8 +505,7 @@ public class AngryFlappyBird extends Application {
             }
     	    for (Sprite egg : eggs) {
                 egg.setVelocity(0, 0);
-    	    }
-    	     
+    	    }    	     
     	}
       	     	
     	// show 
