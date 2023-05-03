@@ -15,6 +15,7 @@ class SpriteTest {
       double positionX = 200.0;
       double positionY = 100.0;
       sprite.setPositionXY(positionX, positionY);
+      // Check if positionX and positionY are stored correctly
       assertEquals(200.0, sprite.getPositionX());
       assertEquals(100.0, sprite.getPositionY());
     }   
@@ -28,6 +29,7 @@ class SpriteTest {
         double velocityX = 30.0;
         double velocityY = -10.0;
         sprite.setVelocity(velocityX, velocityY);
+        // Check if velocityX and velocityY are stored correctly
         assertEquals(30.0, sprite.getVelocityX());
         assertEquals(-10.0, sprite.getVelocityY());
     }
