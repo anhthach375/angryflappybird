@@ -369,12 +369,12 @@ public class AngryFlappyBird extends Application {
                          peaches.get(i).setPositionXY(snoozeX, peaches.get(i).getPositionY());
                          eggs.get(i).setPositionXY(snoozeX, eggs.get(i).getPositionY());
                      }
-                     if (ranValue % 2 == 0 | ranValue % 5 == 0) {
+                     else if (ranValue % 2 == 0 | ranValue % 5 == 0) {
                          peaches.get(i).setPositionXY(nextX, nextY_down - 80);
                          peaches.get(i).setImage(DEF.IMAGE.get("peach"));
                          peaches.get(i).setNotPassed(peaches.get(i));  
                      }
-                     if (ranValue % 3 == 0) {
+                     else if (ranValue % 3 == 0) {
                          eggs.get(i).setPositionXY(nextX, nextY_down - 80);
                      }
                          
