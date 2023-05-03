@@ -55,6 +55,10 @@ public class AngryFlappyBird extends Application {
     private ImageView readyImage = DEF.IMVIEW.get("ready");
     private long snoozingStart;
     private double snoozeRemaining;
+    private int difficulty;
+    private double scene_velocity;
+    private double bread_velocity;
+    
     
 
     // game flags
@@ -127,6 +131,20 @@ public class AngryFlappyBird extends Application {
         breads = new ArrayList<>();
         peaches = new ArrayList<>();
         eggs = new ArrayList<>();
+        difficulty = Math.max(DEF.listView.getSelectionModel().getSelectedIndex(),0);
+        
+        if(difficulty==0) {
+            scene_velocity = DEF.SCENE_SHIFT_INCR_EASY;
+            bread_velocity = DEF.BREAD_VELOCITY_EASY;
+        }
+        else if(difficulty==1) {
+            scene_velocity = DEF.SCENE_SHIFT_INCR_MED;
+            bread_velocity = DEF.BREAD_VELOCITY_MED;
+        }
+        else {
+            scene_velocity = DEF.SCENE_SHIFT_INCR_HARD;
+            bread_velocity = DEF.BREAD_VELOCITY_HARD;
+        }
         
         final ImageView[] backgrounds = new ImageView[]{
                 DEF.IMVIEW.get("backgroundDay"),
@@ -160,15 +178,14 @@ public class AngryFlappyBird extends Application {
                         })            
                 );
                 timeline.setCycleCount(Timeline.INDEFINITE);
-                timeline.play();              
-                   
+                timeline.play();
         }  	
     	// initialize floor
     	for(int i=0; i<DEF.FLOOR_COUNT; i++) {   		
     		int posX = i * DEF.FLOOR_WIDTH;
     		int posY = DEF.SCENE_HEIGHT - DEF.FLOOR_HEIGHT;   		
     		Sprite floor = new Sprite(posX, posY, DEF.IMAGE.get("floor"));
-    		floor.setVelocity(DEF.SCENE_SHIFT_INCR, 0);
+    		floor.setVelocity(scene_velocity, 0);
     		floor.render(gc);    		
     		floors.add(floor);
     	}
@@ -188,7 +205,7 @@ public class AngryFlappyBird extends Application {
                 pipeUp = new Sprite(PIPEUP_POS_X + 150, PIPEUP_POS_Y, DEF.IMAGE.get("pipeflap2"));
             }
             pipeUpCopy = pipeUp;
-            pipeUp.setVelocity(DEF.SCENE_SHIFT_INCR, 0);
+            pipeUp.setVelocity(scene_velocity, 0);
             pipeUp.render(gc);         
             pipeUps.add(pipeUp);
         }   
@@ -197,15 +214,13 @@ public class AngryFlappyBird extends Application {
         Sprite pipeDownCopy = new Sprite(0, 0, DEF.IMAGE.get("pipeflap"));
         for (int i = 0; i < pipeUps.size(); i++) {
             double PIPEDOWN_POS_X = pipeUps.get(i).getPositionX();
-            double PIPEDOWN_POS_Y = pipeUps.get(i).getPositionY() + 480;
-            //int PIPEDOWN_POS_X = ran.nextInt((i+1)*250, (i+2)*250);      
-            //int PIPEDOWN_POS_Y = ran.nextInt(430, 450);   
+            double PIPEDOWN_POS_Y = pipeUps.get(i).getPositionY() + 480;   
             Sprite pipeDown = new Sprite(PIPEDOWN_POS_X, PIPEDOWN_POS_Y, DEF.IMAGE.get("pipeflap"));
             if (pipeDownCopy.intersectsSprite(pipeDown)) {
                 pipeDown = new Sprite(PIPEDOWN_POS_X + 150, PIPEDOWN_POS_Y, DEF.IMAGE.get("pipeflap"));
             }
             pipeDownCopy = pipeDown;
-            pipeDown.setVelocity(DEF.SCENE_SHIFT_INCR, 0);
+            pipeDown.setVelocity(scene_velocity, 0);
             pipeDown.render(gc);    
 
             pipeDowns.add(pipeDown);
@@ -219,7 +234,7 @@ public class AngryFlappyBird extends Application {
                 double breadPosY = pipeUps.get(i).getPositionY();
                 bread.setPositionXY(breadPosX, breadPosY);
                 bread.setImage(DEF.IMAGE.get("bread"));
-                bread.setVelocity(DEF.SCENE_SHIFT_INCR, DEF.BREAD_VELOCITY);
+                bread.setVelocity(scene_velocity, bread_velocity);
             }    
             bread.render(gc);           
             breads.add(bread);
@@ -234,12 +249,12 @@ public class AngryFlappyBird extends Application {
             if (i == 0) {                
                 peach.setPositionXY(eggPosX, eggPosY);
                 peach.setImage(DEF.IMAGE.get("peach"));
-                peach.setVelocity(DEF.SCENE_SHIFT_INCR, 0);
+                peach.setVelocity(scene_velocity, 0);
             }
             else {
                 egg.setPositionXY(eggPosX, eggPosY);
                 egg.setImage(DEF.IMAGE.get("egg"));
-                egg.setVelocity(DEF.SCENE_SHIFT_INCR, 0);
+                egg.setVelocity(scene_velocity, 0);
             } 
             peach.render(gc);  
             egg.render(gc);
@@ -305,7 +320,7 @@ public class AngryFlappyBird extends Application {
 			if (isSnoozed) {	            
 			    blob.setPositionXY(80, 150);
                 blob.setImage(DEF.IMAGE.get("kiki01"));
-                blob.setVelocity(DEF.SNOOZEDFAIRY_VELOCITY, DEF.SCENE_SHIFT_INCR);              
+                blob.setVelocity(DEF.SNOOZEDFAIRY_VELOCITY, scene_velocity);              
               if (!gameScene.getChildren().contains(DEF.snoozeTime)) {
                   gameScene.getChildren().add(DEF.snoozeTime);
               }              
@@ -340,27 +355,28 @@ public class AngryFlappyBird extends Application {
              int ranValue = ran.nextInt(10);
              for(int i=0; i<pipeDowns.size(); i++) {   
                  if (pipeDowns.get(i).getPositionX() <= -DEF.PIPE_WIDTH) { 
-                         double nextX = pipeDowns.get((i+1)%DEF.PIPE_COUNT).getPositionX() + 400;
-                         double nextY_down = ran.nextInt(420, 450);
-                         double nextY_up = nextY_down - 480;
-                         pipeDowns.get(i).setPositionXY(nextX, nextY_down);
-                         pipeDowns.get(i).setNotPassed(pipeDowns.get(i)); 
-                         pipeUps.get(i).setPositionXY(nextX, nextY_up);
-                         pipeUps.get(i).setNotPassed(pipeUps.get(i));
-                         if (isSnoozed) {
-                             pipeDowns.get(i).setPositionXY(1000, pipeDowns.get(i).getPositionY());
-                             pipeUps.get(i).setPositionXY(1000, pipeUps.get(i).getPositionY());
-                             peaches.get(i).setPositionXY(1000, peaches.get(i).getPositionY());
-                             eggs.get(i).setPositionXY(1000, eggs.get(i).getPositionY());
-                         }
-                         if (ranValue % 2 == 0 | ranValue % 5 == 0) {
-                             peaches.get(i).setPositionXY(nextX, nextY_down - 80);
-                             peaches.get(i).setImage(DEF.IMAGE.get("peach"));
-                             peaches.get(i).setNotPassed(peaches.get(i));  
-                         }
-                         if (ranValue % 3 == 0) {
-                             eggs.get(i).setPositionXY(nextX, nextY_down - 80);
-                         }
+                     double nextX = pipeDowns.get((i+1)%DEF.PIPE_COUNT).getPositionX() + 400;
+                     double nextY_down = ran.nextInt(420, 450);
+                     double nextY_up = nextY_down - 480;
+                     pipeDowns.get(i).setPositionXY(nextX, nextY_down);
+                     pipeDowns.get(i).setNotPassed(pipeDowns.get(i)); 
+                     pipeUps.get(i).setPositionXY(nextX, nextY_up);
+                     pipeUps.get(i).setNotPassed(pipeUps.get(i));
+                     if (isSnoozed) {
+                         double snoozeX = 1200*(scene_velocity/DEF.SCENE_SHIFT_INCR_MED);
+                         pipeDowns.get(i).setPositionXY(snoozeX, pipeDowns.get(i).getPositionY());
+                         pipeUps.get(i).setPositionXY(snoozeX, pipeUps.get(i).getPositionY());
+                         peaches.get(i).setPositionXY(snoozeX, peaches.get(i).getPositionY());
+                         eggs.get(i).setPositionXY(snoozeX, eggs.get(i).getPositionY());
+                     }
+                     if (ranValue % 2 == 0 | ranValue % 5 == 0) {
+                         peaches.get(i).setPositionXY(nextX, nextY_down - 80);
+                         peaches.get(i).setImage(DEF.IMAGE.get("peach"));
+                         peaches.get(i).setNotPassed(peaches.get(i));  
+                     }
+                     if (ranValue % 3 == 0) {
+                         eggs.get(i).setPositionXY(nextX, nextY_down - 80);
+                     }
                          
                  }
                  pipeDowns.get(i).render(gc);
@@ -371,7 +387,7 @@ public class AngryFlappyBird extends Application {
                  peaches.get(i).update(DEF.SCENE_SHIFT_TIME);
                  eggs.get(i).render(gc);
                  eggs.get(i).update(DEF.SCENE_SHIFT_TIME);                                      
-              }                  
+             }                  
 
          }
     	 
@@ -380,7 +396,7 @@ public class AngryFlappyBird extends Application {
              for(int i=0; i<breads.size(); i++) {
                  Random ran = new Random();
                  double waitDistance = ran.nextInt(200,2000);
-                 if (breads.get(i).getPositionX() <= -waitDistance && !HIT_PIPE_OR_PIG) {
+                 if (breads.get(i).getPositionX() <= -waitDistance && !HIT_PIPE_OR_PIG && !isSnoozed) {
                      //get X position from farthest pipe
                      double nextX = 0;
                      for (int j=0; j<pipeUps.size(); j++){
@@ -402,8 +418,8 @@ public class AngryFlappyBird extends Application {
              gameoverImage.setX(DEF.SCENE_WIDTH / 2 - gameoverImage.getBoundsInLocal().getWidth() / 2);
              gameoverImage.setY(DEF.SCENE_HEIGHT / 3);
     		  // check collision                  
-    	    if (!isSnoozed) {
-    	        for (Sprite floor: floors) {
+    	    if (!isSnoozed) { 
+    	      for (Sprite floor: floors) {
                   GAME_OVER = GAME_OVER || blob.intersectsSprite(floor);
                   if (blob.intersectsSprite(floor)) {
                       livesLeft--;           
@@ -438,7 +454,16 @@ public class AngryFlappyBird extends Application {
                       peach.setPassed(peach);
                       sound.play("point.mp3");
                       break;
-                  }                                           
+                  }
+                  for (int i=0; i<breads.size(); i++) {
+                      if (!HIT_PIPE_OR_PIG) {
+                          if (peach.intersectsSprite(breads.get(i))) {
+                              totalScore = Math.max(0, totalScore - 3 );
+                              SCORE.updateScoreText(DEF.scoreText, totalScore);
+                              moveBreadNow(i);
+                          }
+                      }
+                  }
              }
                for (Sprite egg : eggs) {
                    if (blob.intersectsSprite(egg) && !egg.isPassed()) {
@@ -449,7 +474,16 @@ public class AngryFlappyBird extends Application {
                            sound.play("snooze.mp3");
                            snoozingStart = System.nanoTime();
                        }
-                   }              
+                   } 
+                   for (int i=0; i<breads.size(); i++) {
+                       if (!HIT_PIPE_OR_PIG) {
+                           if (egg.intersectsSprite(breads.get(i))) {
+                               totalScore = Math.max(0, totalScore - 3 );
+                               SCORE.updateScoreText(DEF.scoreText, totalScore);
+                               moveBreadNow(i);
+                           }
+                       }
+                   }
                }           
              // if bird hits bread or pipe, bounce and wait to hit floor
              if(HIT_PIPE_OR_PIG) {
@@ -476,7 +510,22 @@ public class AngryFlappyBird extends Application {
         }
   }  	 
 	
-    	private void stopMotion() {
+    	 private void moveBreadNow(int index) {
+    	     //get X position from farthest pipe
+             double nextX = 0;
+             for (int j=0; j<pipeUps.size(); j++){
+                 if (pipeUps.get(j).getPositionX()>nextX) {
+                     nextX = pipeUps.get(j).getPositionX();
+                 }
+             }
+             double nextY = 0;
+             breads.get(index).setPositionXY(nextX, nextY);
+             breads.get(index).setNotPassed(breads.get(index));                            
+             breads.get(index).render(gc);
+             breads.get(index).update(DEF.SCENE_SHIFT_TIME);
+    	 }
+    	 
+    	 private void stopMotion() {
     	    for (Sprite floor: floors) {
                 floor.setVelocity(0, 0);
             }
@@ -507,15 +556,7 @@ public class AngryFlappyBird extends Application {
                         sound.play("point.mp3");
                         break; 
                     }
-              }
-              for (Sprite pipe : pipeDowns) {
-                  if (blob.getPositionX() > pipe.getPositionX() && !pipe.isPassed()) {
-                      SCORE.updateScoreText(DEF.scoreText, totalScore++);
-                      pipe.setPassed(pipe);
-                      sound.play("point.mp3");
-                      break; 
-                  }
-              }                
+                }
     	    }
     	}    	 
         private void showHitEffect() {

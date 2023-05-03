@@ -45,7 +45,9 @@ public class Defines {
     
     // coefficients related to time
     final int SCENE_SHIFT_TIME = 5;
-    final double SCENE_SHIFT_INCR = -0.4;
+    final double SCENE_SHIFT_INCR_EASY = -0.2;
+    final double SCENE_SHIFT_INCR_MED = -0.4;
+    final double SCENE_SHIFT_INCR_HARD = -0.6;
     final double NANOSEC_TO_SEC = 1.0 / 1000000000.0;
     final double TRANSITION_TIME = 0.1;
     final int TRANSITION_CYCLE = 2;
@@ -58,7 +60,9 @@ public class Defines {
     // coefficients related to the bread
     final int BREAD_WIDTH = 60;
     final int BREAD_HEIGHT = 60;
-    final double BREAD_VELOCITY = 0.2;
+    final double BREAD_VELOCITY_EASY = 0.1;
+    final double BREAD_VELOCITY_MED = 0.2;
+    final double BREAD_VELOCITY_HARD = 0.3;
     
     // coefficients related to the eggs and peach
     final int EGG_WIDTH = 80;
@@ -102,19 +106,18 @@ public class Defines {
 			Image img;
 			if (i == 7) {
                 img = new Image(pathImage(IMAGE_FILES[i]), FLOOR_WIDTH, FLOOR_HEIGHT, false, false);
-
 			}
 			else if (i == 3 || i == 4 || i == 5 | i == 6){
 				img = new Image(pathImage(IMAGE_FILES[i]), BLOB_WIDTH, BLOB_HEIGHT, false, false);
 			}
 			else if (i == 8 | i == 9){
-	             img = new Image(pathImage(IMAGE_FILES[i]), PIPE_WIDTH, PIPE_HEIGHT, false, false);
+	            img = new Image(pathImage(IMAGE_FILES[i]), PIPE_WIDTH, PIPE_HEIGHT, false, false);
 			}
 			else if (i == 10) {
-	              img = new Image(pathImage(IMAGE_FILES[i]), BREAD_WIDTH, BREAD_HEIGHT, false, false);
+	            img = new Image(pathImage(IMAGE_FILES[i]), BREAD_WIDTH, BREAD_HEIGHT, false, false);
 			}
 			else if (i == 11 | i == 12) {
-	               img = new Image(pathImage(IMAGE_FILES[i]), EGG_WIDTH, EGG_HEIGHT, false, false);
+	            img = new Image(pathImage(IMAGE_FILES[i]), EGG_WIDTH, EGG_HEIGHT, false, false);
 			}
 			else if (i == 13) {
                 img = new Image(pathImage(IMAGE_FILES[i]), START_WIDTH, START_HEIGHT, false, false);
