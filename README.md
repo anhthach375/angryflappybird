@@ -1,4 +1,5 @@
-[![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-24ddc0f5d75046c5622901739e7c5dd533143b0c8e959d652212380cedb1ea36.svg)](https://classroom.github.com/a/BZ2B4lzd)
 # AngryFlappyBird
-This is a starter code of Angry Flappy Bird using the JavaFX platform.
+This is the code for an Angry Flappy Bird game using the JavaFX platform.
+It has a Kiki's Delivery Theme twist to the combination of Angry Birds and Flappy Birds! Help Kiki pass through pipes, avoid bread, collect cacti for extra points and windy coulds to take a break. 
 
+This code runs on JavaFX 11. In order to run this game you will need to download the JavaFX 11 library. 
