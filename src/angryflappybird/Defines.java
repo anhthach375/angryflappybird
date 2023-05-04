@@ -45,7 +45,7 @@ public class Defines {
     
     // coefficients related to time
     final int SCENE_SHIFT_TIME = 5;
-    final double SCENE_SHIFT_INCR_EASY = -0.2;
+    final double SCENE_SHIFT_INCR_EASY = -0.3;
     final double SCENE_SHIFT_INCR_MED = -0.4;
     final double SCENE_SHIFT_INCR_HARD = -0.6;
     final double NANOSEC_TO_SEC = 1.0 / 1000000000.0;
