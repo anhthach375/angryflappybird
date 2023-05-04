@@ -355,7 +355,7 @@ public class AngryFlappyBird extends Application {
              int ranValue = ran.nextInt(10);
              for(int i=0; i<pipeDowns.size(); i++) {   
                  if (pipeDowns.get(i).getPositionX() <= -DEF.PIPE_WIDTH) { 
-                     double nextX = pipeDowns.get((i+1)%DEF.PIPE_COUNT).getPositionX() + 400;
+                     double nextX = pipeDowns.get((i+1)%DEF.PIPE_COUNT).getPositionX() + 300;
                      double nextY_down = ran.nextInt(420, 450);
                      double nextY_up = nextY_down - 480;
                      pipeDowns.get(i).setPositionXY(nextX, nextY_down);
@@ -363,7 +363,7 @@ public class AngryFlappyBird extends Application {
                      pipeUps.get(i).setPositionXY(nextX, nextY_up);
                      pipeUps.get(i).setNotPassed(pipeUps.get(i));
                      if (isSnoozed) {
-                         double snoozeX = 1200*(scene_velocity/DEF.SCENE_SHIFT_INCR_MED);
+                         double snoozeX = 1000*(scene_velocity/DEF.SCENE_SHIFT_INCR_MED);
                          pipeDowns.get(i).setPositionXY(snoozeX, pipeDowns.get(i).getPositionY());
                          pipeUps.get(i).setPositionXY(snoozeX, pipeUps.get(i).getPositionY());
                          peaches.get(i).setPositionXY(snoozeX, peaches.get(i).getPositionY());
