@@ -40,19 +40,17 @@ public class AngryFlappyBird extends Application {
     private AnimationTimer timer;
     
     // game components
-    private Sprite blob;
+    private Sprite kiki;
     private ArrayList<Sprite> floors;
     private ArrayList<Sprite> pipeUps;
     private ArrayList<Sprite> pipeDowns;
     private ArrayList<Sprite> breads;
-    private ArrayList<Sprite> peaches;
-    private ArrayList<Sprite> eggs;
+    private ArrayList<Sprite> cactuses;
+    private ArrayList<Sprite> clouds;
     private Text scoreText;
     private int totalScore;
     private int livesLeft = 3;
     private boolean isSnoozed = false;
-    private ImageView gameoverImage = DEF.IMVIEW.get("gameover");
-    private ImageView readyImage = DEF.IMVIEW.get("ready");
     private long snoozingStart;
     private double snoozeRemaining;
     private int difficulty;
@@ -101,7 +99,7 @@ public class AngryFlappyBird extends Application {
     private void resetGameControl() {      
         DEF.startButton.setOnMouseClicked(this::mouseClickHandler);
         gameControl = new VBox(25);
-        gameControl.getChildren().addAll(DEF.startButton,DEF.listView,DEF.peachBox,DEF.snoozeEggBox,DEF.breadBox); 
+        gameControl.getChildren().addAll(DEF.startButton,DEF.listView,DEF.cactusBox,DEF.snoozeCloudBox,DEF.breadBox); 
     }
     
     private void mouseClickHandler(MouseEvent e) {
@@ -129,8 +127,8 @@ public class AngryFlappyBird extends Application {
         pipeUps = new ArrayList<>();
         pipeDowns = new ArrayList<>();
         breads = new ArrayList<>();
-        peaches = new ArrayList<>();
-        eggs = new ArrayList<>();
+        cactuses = new ArrayList<>();
+        clouds = new ArrayList<>();
         difficulty = Math.max(DEF.listView.getSelectionModel().getSelectedIndex(),0);
         
         if(difficulty==0) {
@@ -190,9 +188,9 @@ public class AngryFlappyBird extends Application {
     		floors.add(floor);
     	}
         
-        // initialize blob
-        blob = new Sprite(DEF.BLOB_POS_X, DEF.BLOB_POS_Y,DEF.IMAGE.get("kiki01"));
-        blob.render(gc);
+        // initialize kiki
+    	kiki = new Sprite(DEF.KIKI_POS_X, DEF.KIKI_POS_Y,DEF.IMAGE.get("kiki01"));
+    	kiki.render(gc);
         
         // initialize pipeUp  
         Random ran = new Random();
@@ -240,26 +238,26 @@ public class AngryFlappyBird extends Application {
             breads.add(bread);
         }
         
-        // initialize egg and peach
+        // initialize cactus and cloud
         for (int i=0; i < pipeDowns.size() ; i++) {
-            Sprite peach = new Sprite();
-            Sprite egg = new Sprite();
-            double eggPosX = pipeDowns.get(i).getPositionX();
-            double eggPosY = pipeDowns.get(i).getPositionY() - 80;
+            Sprite cactus = new Sprite();
+            Sprite cloud = new Sprite();
+            double cloudPosX = pipeDowns.get(i).getPositionX();
+            double cloudPosY = pipeDowns.get(i).getPositionY() - 80;
             if (i == 0) {                
-                peach.setPositionXY(eggPosX, eggPosY);
-                peach.setImage(DEF.IMAGE.get("peach"));
-                peach.setVelocity(scene_velocity, 0);
+                cactus.setPositionXY(cloudPosX, cloudPosY);
+                cactus.setImage(DEF.IMAGE.get("cactus"));
+                cactus.setVelocity(scene_velocity, 0);
             }
             else {
-                egg.setPositionXY(eggPosX, eggPosY);
-                egg.setImage(DEF.IMAGE.get("egg"));
-                egg.setVelocity(scene_velocity, 0);
+                cloud.setPositionXY(cloudPosX, cloudPosY);
+                cloud.setImage(DEF.IMAGE.get("cloud"));
+                cloud.setVelocity(scene_velocity, 0);
             } 
-            peach.render(gc);  
-            egg.render(gc);
-            peaches.add(peach);
-            eggs.add(egg);
+            cactus.render(gc);  
+            cloud.render(gc);
+            cactuses.add(cactus);
+            clouds.add(cloud);
         }
         // initialize timer
         startTime = System.nanoTime();
@@ -283,10 +281,10 @@ public class AngryFlappyBird extends Application {
     	     if (GAME_START) {
         	     // step1: update non-player objects
         	     moveFloor();
-        	     movePipesandPeaches();
+        	     movePipesandCactus();
                  moveBread();
-                 // step2: update blob
-    	    	 moveBlob();   
+                 // step2: update kiki
+    	    	 moveKiki();   
     	    	 // step3: check for extras
     	    	 checkCollision();
     	    	 passPipeEffect();	 	    	  	    	   
@@ -314,13 +312,13 @@ public class AngryFlappyBird extends Application {
              }
           }   	
 
-    	 // step2: update blob
-    	 private void moveBlob() {  	
+    	 // step2: update kiki
+    	 private void moveKiki() {  	
 			long diffTime = System.nanoTime() - clickTime;			
 			if (isSnoozed) {	            
-			    blob.setPositionXY(80, 150);
-                blob.setImage(DEF.IMAGE.get("kiki01"));
-                blob.setVelocity(DEF.SNOOZEDFAIRY_VELOCITY, scene_velocity);              
+			    kiki.setPositionXY(80, 150);
+			    kiki.setImage(DEF.IMAGE.get("kiki01"));
+			    kiki.setVelocity(DEF.SNOOZEDKIKI_VELOCITY, scene_velocity);              
               if (!gameScene.getChildren().contains(DEF.snoozeTime)) {
                   gameScene.getChildren().add(DEF.snoozeTime);
               }              
@@ -331,26 +329,26 @@ public class AngryFlappyBird extends Application {
                   );
                 snoozeTimeline.play();              
 			}
-			else if (!CLICKED && diffTime <= DEF.BLOB_DROP_TIME) {		
+			else if (!CLICKED && diffTime <= DEF.KIKI_DROP_TIME) {		
 
-				int imageIndex = Math.floorDiv(counter++, DEF.BLOB_IMG_PERIOD);
-				imageIndex = Math.floorMod(imageIndex, DEF.BLOB_IMG_LEN);
-				blob.setImage(DEF.IMAGE.get("kiki0"+String.valueOf(imageIndex+1)));
-				blob.setVelocity(0, DEF.BLOB_FLY_VEL);
+				int imageIndex = Math.floorDiv(counter++, DEF.KIKI_IMG_PERIOD);
+				imageIndex = Math.floorMod(imageIndex, DEF.KIKI_IMG_LEN);
+				kiki.setImage(DEF.IMAGE.get("kiki0"+String.valueOf(imageIndex+1)));
+				kiki.setVelocity(0, DEF.KIKI_FLY_VEL);
 			}
-			// blob drops after a period of time without button click if haven't hit pipe or pig
+			// Kiki drops after a period of time without button click if haven't hit pipe or pig
 			else if(!HIT_PIPE_OR_PIG){
-			    blob.setVelocity(0, DEF.BLOB_DROP_VEL); 
+			    kiki.setVelocity(0, DEF.KIKI_DROP_VEL); 
 			    CLICKED = false;
 			}
 
-			// render blob on GUI
-			blob.update(elapsedTime * DEF.NANOSEC_TO_SEC);
-			blob.render(gc);
+			// render kiki on GUI
+			kiki.update(elapsedTime * DEF.NANOSEC_TO_SEC);
+			kiki.render(gc);
     	 }  
     	   	
-    	 // step 3: update pipes and randomize peach
-    	 private void movePipesandPeaches() {   
+    	 // step 3: update pipes and randomize cactus
+    	 private void movePipesandCactus() {   
              Random ran = new Random(); 
              int ranValue = ran.nextInt(10);
              for(int i=0; i<pipeDowns.size(); i++) {   
@@ -366,16 +364,16 @@ public class AngryFlappyBird extends Application {
                          double snoozeX = 1000*(scene_velocity/DEF.SCENE_SHIFT_INCR_MED);
                          pipeDowns.get(i).setPositionXY(snoozeX, pipeDowns.get(i).getPositionY());
                          pipeUps.get(i).setPositionXY(snoozeX, pipeUps.get(i).getPositionY());
-                         peaches.get(i).setPositionXY(snoozeX, peaches.get(i).getPositionY());
-                         eggs.get(i).setPositionXY(snoozeX, eggs.get(i).getPositionY());
+                         cactuses.get(i).setPositionXY(snoozeX, cactuses.get(i).getPositionY());
+                         clouds.get(i).setPositionXY(snoozeX, clouds.get(i).getPositionY());
                      }
                      else if (ranValue % 2 == 0 | ranValue % 5 == 0) {
-                         peaches.get(i).setPositionXY(nextX, nextY_down - 80);
-                         peaches.get(i).setImage(DEF.IMAGE.get("peach"));
-                         peaches.get(i).setNotPassed(peaches.get(i));  
+                         cactuses.get(i).setPositionXY(nextX, nextY_down - 80);
+                         cactuses.get(i).setImage(DEF.IMAGE.get("cactus"));
+                         cactuses.get(i).setNotPassed(cactuses.get(i));  
                      }
                      else if (ranValue % 3 == 0) {
-                         eggs.get(i).setPositionXY(nextX, nextY_down - 80);
+                         clouds.get(i).setPositionXY(nextX, nextY_down - 80);
                      }
                          
                  }
@@ -383,10 +381,10 @@ public class AngryFlappyBird extends Application {
                  pipeDowns.get(i).update(DEF.SCENE_SHIFT_TIME);
                  pipeUps.get(i).render(gc);
                  pipeUps.get(i).update(DEF.SCENE_SHIFT_TIME);
-                 peaches.get(i).render(gc);
-                 peaches.get(i).update(DEF.SCENE_SHIFT_TIME);
-                 eggs.get(i).render(gc);
-                 eggs.get(i).update(DEF.SCENE_SHIFT_TIME);                                      
+                 cactuses.get(i).render(gc);
+                 cactuses.get(i).update(DEF.SCENE_SHIFT_TIME);
+                 clouds.get(i).render(gc);
+                 clouds.get(i).update(DEF.SCENE_SHIFT_TIME);                                      
              }                  
 
          }
@@ -420,24 +418,24 @@ public class AngryFlappyBird extends Application {
     		  // check collision                  
     	    if (!isSnoozed) { 
     	      for (Sprite floor: floors) {
-                  GAME_OVER = GAME_OVER || blob.intersectsSprite(floor);
-                  if (blob.intersectsSprite(floor)) {
+                  GAME_OVER = GAME_OVER || kiki.intersectsSprite(floor);
+                  if (kiki.intersectsSprite(floor)) {
                       livesLeft--;           
                       SCORE.updateLivesText(DEF.livesText, livesLeft);
                    }
               }                
               for (Sprite pipe : pipeUps) {
-                  if (blob.intersectsSprite(pipe)) {
+                  if (kiki.intersectsSprite(pipe)) {
                       HIT_PIPE_OR_PIG = true;
                    }
               }               
               for (Sprite pipe : pipeDowns) {
-                  if (blob.intersectsSprite(pipe)) {
+                  if (kiki.intersectsSprite(pipe)) {
                       HIT_PIPE_OR_PIG = true;
                    }            
                }           
               for (Sprite bread : breads) {
-                  if (blob.intersectsSprite(bread)) {
+                  if (kiki.intersectsSprite(bread)) {
                       if (!HIT_PIPE_OR_PIG) {
                           sound.play("pig_sound.mp3");
                           totalScore = 0;
@@ -447,17 +445,17 @@ public class AngryFlappyBird extends Application {
                   }
               }
                   
-               for (Sprite peach : peaches) {
-                  if (blob.intersectsSprite(peach) && !peach.isPassed()) {
-                      peach.setVisible(false);
+               for (Sprite cactus : cactuses) {
+                  if (kiki.intersectsSprite(cactus) && !cactus.isPassed()) {
+                      cactus.setVisible(false);
                       SCORE.updateScoreText(DEF.scoreText, totalScore++);
-                      peach.setPassed(peach);
+                      cactus.setPassed(cactus);
                       sound.play("point.mp3");
                       break;
                   }
                   for (int i=0; i<breads.size(); i++) {
                       if (!HIT_PIPE_OR_PIG) {
-                          if (peach.intersectsSprite(breads.get(i))) {
+                          if (cactus.intersectsSprite(breads.get(i))) {
                               totalScore = Math.max(0, totalScore - 3 );
                               SCORE.updateScoreText(DEF.scoreText, totalScore);
                               moveBreadNow(i);
@@ -465,19 +463,19 @@ public class AngryFlappyBird extends Application {
                       }
                   }
              }
-               for (Sprite egg : eggs) {
-                   if (blob.intersectsSprite(egg) && !egg.isPassed()) {
+               for (Sprite cloud : clouds) {
+                   if (kiki.intersectsSprite(cloud) && !cloud.isPassed()) {
                        if (!HIT_PIPE_OR_PIG) {
-                           egg.setVisible(false);                  
+                           cloud.setVisible(false);                  
                            isSnoozed = true;
-                           egg.setPassed(egg);
+                           cloud.setPassed(cloud);
                            sound.play("snooze.mp3");
                            snoozingStart = System.nanoTime();
                        }
                    } 
                    for (int i=0; i<breads.size(); i++) {
                        if (!HIT_PIPE_OR_PIG) {
-                           if (egg.intersectsSprite(breads.get(i))) {
+                           if (cloud.intersectsSprite(breads.get(i))) {
                                totalScore = Math.max(0, totalScore - 3 );
                                SCORE.updateScoreText(DEF.scoreText, totalScore);
                                moveBreadNow(i);
@@ -487,11 +485,11 @@ public class AngryFlappyBird extends Application {
                }           
              // if bird hits bread or pipe, bounce and wait to hit floor
              if(HIT_PIPE_OR_PIG) {
-                 blob.setVelocity(DEF.BLOB_FLY_BACK_VEL, DEF.BLOB_DROP_VEL); 
+                 kiki.setVelocity(DEF.KIKI_FLY_BACK_VEL, DEF.KIKI_DROP_VEL); 
                  stopMotion();
              }
            }
-      // end the game when blob hit stuff
+      // end the game when kiki hit stuff
         if (GAME_OVER) {
           showHitEffect(); 
           stopMotion();
@@ -538,11 +536,11 @@ public class AngryFlappyBird extends Application {
     	    for (Sprite bread: breads) {
                 bread.setVelocity(0, 0);
             }
-    	    for (Sprite peach: peaches) {
-                peach.setVelocity(0, 0);
+    	    for (Sprite cactus: cactuses) {
+    	        cactus.setVelocity(0, 0);
             }
-    	    for (Sprite egg : eggs) {
-                egg.setVelocity(0, 0);
+    	    for (Sprite cloud : clouds) {
+    	        cloud.setVelocity(0, 0);
     	    }    	     
     	}
       	     	
@@ -550,7 +548,7 @@ public class AngryFlappyBird extends Application {
     	private void passPipeEffect() {
     	    if (!isSnoozed) {
     	        for (Sprite pipe : pipeUps) {
-                    if (blob.getPositionX() > pipe.getPositionX() && !pipe.isPassed()) {
+                    if (kiki.getPositionX() > pipe.getPositionX() && !pipe.isPassed()) {
                         SCORE.updateScoreText(DEF.scoreText, totalScore++);
                         pipe.setPassed(pipe);
                         sound.play("point.mp3");
