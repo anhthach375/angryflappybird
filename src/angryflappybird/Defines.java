@@ -27,16 +27,16 @@ public class Defines {
     final int OVER_HEIGHT = 300;
 
     // coefficients related to the blob
-    final int BLOB_WIDTH = 110;
-    final int BLOB_HEIGHT = 70;
-    final int BLOB_POS_X = 30;
-    final int BLOB_POS_Y = 10;
-    final int BLOB_DROP_TIME = 300000000;  	// the elapsed time threshold before the blob starts dropping
-    final int BLOB_FLY_BACK_VEL = -150;    // blob bounce back volocity
-    final int BLOB_DROP_VEL = 200;    		// the blob drop velocity
-    final int BLOB_FLY_VEL = -80;          // how far the blob goes up when clicked
-    final int BLOB_IMG_LEN = 4;
-    final int BLOB_IMG_PERIOD = 6;
+    final int KIKI_WIDTH = 110;
+    final int KIKI_HEIGHT = 70;
+    final int KIKI_POS_X = 30;
+    final int KIKI_POS_Y = 10;
+    final int KIKI_DROP_TIME = 300000000;  	// the elapsed time threshold before the blob starts dropping
+    final int KIKI_FLY_BACK_VEL = -150;    // blob bounce back volocity
+    final int KIKI_DROP_VEL = 200;    		// the blob drop velocity
+    final int KIKI_FLY_VEL = -80;          // how far the blob goes up when clicked
+    final int KIKI_IMG_LEN = 4;
+    final int KIKI_IMG_PERIOD = 6;
     
     // coefficients related to the floors
     final int FLOOR_WIDTH = 400;
@@ -65,13 +65,13 @@ public class Defines {
     final double BREAD_VELOCITY_HARD = 0.3;
     
     // coefficients related to the eggs and peach
-    final int EGG_WIDTH = 80;
-    final int EGG_HEIGHT = 80;
+    final int CLOUD_WIDTH = 80;
+    final int CLOUD_HEIGHT = 80;
     
     // coefficients related to the snoozedfairy
-    final int SNOOZEDFAIRY_WIDTH = 300;
-    final int SNOOZEDFAIRY_HEIGHT = 300;
-    final double SNOOZEDFAIRY_VELOCITY = 0.5;
+    final int SNOOZEDKIKI_WIDTH = 300;
+    final int SNOOZEDKIKI_HEIGHT = 300;
+    final double SNOOZEDKIKI_VELOCITY = 0.5;
     
     // coefficients  related to media display
     final String STAGE_TITLE = "Angry Flappy Bird";
@@ -79,7 +79,7 @@ public class Defines {
 
     final String[] IMAGE_FILES = 
         {"backgroundDay", "backgroundAfternoon", "backgroundNight", "kiki01", "kiki02", "kiki03", "kiki04", "floor", "pipeflap2",
-         "pipeflap", "bread", "peach", "egg", "ready", "gameover"};
+         "pipeflap", "bread", "cactus", "cloud", "ready", "gameover"};
 
     final HashMap<String, ImageView> IMVIEW = new HashMap<String, ImageView>();
     final HashMap<String, Image> IMAGE = new HashMap<String, Image>();
@@ -91,8 +91,8 @@ public class Defines {
     //nodes on the scene graph
     Button startButton;
     ListView<String> listView;
-    HBox peachBox;
-    HBox snoozeEggBox;
+    HBox cactusBox;
+    HBox snoozeCloudBox;
     HBox breadBox;
     Text scoreText = new Text("0");
     Text livesText = new Text("3 lives left");
@@ -108,7 +108,7 @@ public class Defines {
                 img = new Image(pathImage(IMAGE_FILES[i]), FLOOR_WIDTH, FLOOR_HEIGHT, false, false);
 			}
 			else if (i == 3 || i == 4 || i == 5 | i == 6){
-				img = new Image(pathImage(IMAGE_FILES[i]), BLOB_WIDTH, BLOB_HEIGHT, false, false);
+				img = new Image(pathImage(IMAGE_FILES[i]), KIKI_WIDTH, KIKI_HEIGHT, false, false);
 			}
 			else if (i == 8 | i == 9){
 	            img = new Image(pathImage(IMAGE_FILES[i]), PIPE_WIDTH, PIPE_HEIGHT, false, false);
@@ -117,7 +117,7 @@ public class Defines {
 	            img = new Image(pathImage(IMAGE_FILES[i]), BREAD_WIDTH, BREAD_HEIGHT, false, false);
 			}
 			else if (i == 11 | i == 12) {
-	            img = new Image(pathImage(IMAGE_FILES[i]), EGG_WIDTH, EGG_HEIGHT, false, false);
+	            img = new Image(pathImage(IMAGE_FILES[i]), CLOUD_WIDTH, CLOUD_HEIGHT, false, false);
 			}
 			else if (i == 13) {
                 img = new Image(pathImage(IMAGE_FILES[i]), START_WIDTH, START_HEIGHT, false, false);
@@ -146,14 +146,14 @@ public class Defines {
 	    listView.setMaxSize(200, 80);
 	    
 	    // initialize the normal egg's description
-	    peachBox= new HBox();
-	    peachBox.getChildren().add(IMVIEW.get("peach"));
-	    peachBox.getChildren().add(new Text ("Bonus points"));
+	    cactusBox= new HBox();
+	    cactusBox.getChildren().add(IMVIEW.get("cactus"));
+	    cactusBox.getChildren().add(new Text ("Bonus points"));
 	    
 	    // initialize the snooze egg's description
-	    snoozeEggBox= new HBox();
-        snoozeEggBox.getChildren().add(IMVIEW.get("egg"));
-        snoozeEggBox.getChildren().add(new Text ("Lets you snooze"));
+	    snoozeCloudBox= new HBox();
+	    snoozeCloudBox.getChildren().add(IMVIEW.get("cloud"));
+	    snoozeCloudBox.getChildren().add(new Text ("Lets you snooze"));
 	    
         // initialize the bread egg's description
         breadBox = new HBox();
