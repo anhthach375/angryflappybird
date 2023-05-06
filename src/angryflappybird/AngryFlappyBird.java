@@ -465,7 +465,6 @@ public class AngryFlappyBird extends Application {
                               cactus.setVisible(false);
                               totalScore = Math.max(0, totalScore - 3 );
                               SCORE.updateScoreText(DEF.scoreText, totalScore);
-                              moveBreadNow(i);
                           }
                       }
                   }
@@ -486,7 +485,6 @@ public class AngryFlappyBird extends Application {
                                cloud.setVisible(false);
                                totalScore = Math.max(0, totalScore - 3 );
                                SCORE.updateScoreText(DEF.scoreText, totalScore);
-                               moveBreadNow(i);
                            }
                        }
                    }
@@ -515,21 +513,6 @@ public class AngryFlappyBird extends Application {
             SCORE.updateLivesText(DEF.livesText, livesLeft);
         }
   }  	 
-	
-    	 private void moveBreadNow(int index) {
-    	     //get X position from farthest pipe
-             double nextX = 0;
-             for (int j=0; j<pipeUps.size(); j++){
-                 if (pipeUps.get(j).getPositionX()>nextX) {
-                     nextX = pipeUps.get(j).getPositionX();
-                 }
-             }
-             double nextY = 0;
-             breads.get(index).setPositionXY(nextX, nextY);
-             breads.get(index).setNotPassed(breads.get(index));                            
-             breads.get(index).render(gc);
-             breads.get(index).update(DEF.SCENE_SHIFT_TIME);
-    	 }
     	 
     	 private void stopMotion() {
     	    for (Sprite floor: floors) {
