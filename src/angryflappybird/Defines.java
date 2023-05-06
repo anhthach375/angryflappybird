@@ -1,8 +1,6 @@
 package angryflappybird;
 
-import java.awt.Font;
 import java.util.HashMap;
-import java.util.Random;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -11,12 +9,16 @@ import javafx.scene.control.ListView;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
-import javafx.scene.text.FontWeight;
 import javafx.scene.text.Text;
 
+/**
+ * This class contains all of the coefficients related to the game app, scene, UI, and components. 
+ * It can initialize all the components and their change images
+ *
+ */
 public class Defines { 
     
-	// dimension of the GUI application
+    // dimensions of the GUI application
     final int APP_HEIGHT = 600;
     final int APP_WIDTH = 600;
     final int SCENE_HEIGHT = 570;
@@ -32,7 +34,7 @@ public class Defines {
     final int KIKI_POS_X = 30;
     final int KIKI_POS_Y = 10;
     final int KIKI_DROP_TIME = 300000000;  	// the elapsed time threshold before the blob starts dropping
-    final int KIKI_FLY_BACK_VEL = -150;    // blob bounce back volocity
+    final int KIKI_FLY_BACK_VEL = -150;    // blob bounce back velocity
     final int KIKI_DROP_VEL = 200;    		// the blob drop velocity
     final int KIKI_FLY_VEL = -80;          // how far the blob goes up when clicked
     final int KIKI_IMG_LEN = 4;
@@ -60,7 +62,7 @@ public class Defines {
     // coefficients related to the bread
     final int BREAD_WIDTH = 60;
     final int BREAD_HEIGHT = 60;
-    final double BREAD_VELOCITY_EASY = 0.1;
+    final double BREAD_VELOCITY_EASY = 0.15;
     final double BREAD_VELOCITY_MED = 0.2;
     final double BREAD_VELOCITY_HARD = 0.3;
     
@@ -68,7 +70,7 @@ public class Defines {
     final int CLOUD_WIDTH = 80;
     final int CLOUD_HEIGHT = 80;
     
-    // coefficients related to the snoozedfairy
+    // coefficients related to the snoozedKiki
     final int SNOOZEDKIKI_WIDTH = 300;
     final int SNOOZEDKIKI_HEIGHT = 300;
     final double SNOOZEDKIKI_VELOCITY = 0.5;
@@ -98,7 +100,12 @@ public class Defines {
     Text livesText = new Text("3 lives left");
     Text snoozeTime = new Text("");
     
-    // constructor
+    /**
+     * This is the constructor for the defines class. 
+     * It initializes the components of the game
+     * It takes in no arguments and returns nothing
+     *   
+     */
 	Defines() {
 		
 		// initialize images
@@ -145,17 +152,17 @@ public class Defines {
 		listView = new ListView<String>(levels);
 	    listView.setMaxSize(200, 80);
 	    
-	    // initialize the normal egg's description
+	    // initialize the cactus description
 	    cactusBox= new HBox();
 	    cactusBox.getChildren().add(IMVIEW.get("cactus"));
 	    cactusBox.getChildren().add(new Text ("Bonus points"));
 	    
-	    // initialize the snooze egg's description
+	    // initialize the cloud description
 	    snoozeCloudBox= new HBox();
 	    snoozeCloudBox.getChildren().add(IMVIEW.get("cloud"));
 	    snoozeCloudBox.getChildren().add(new Text ("Lets you snooze"));
 	    
-        // initialize the bread egg's description
+        // initialize the bread description
         breadBox = new HBox();
         breadBox.getChildren().add(IMVIEW.get("bread"));
         breadBox.getChildren().add(new Text ("Avoid bread"));
@@ -166,13 +173,13 @@ public class Defines {
         scoreText.setLayoutX(20);
         scoreText.setLayoutY(50);
         
-     // initialize the lives left
+        // initialize the lives left
         livesText.setStyle("-fx-font-size: 35;");
         livesText.setFill(javafx.scene.paint.Color.RED);
         livesText.setLayoutX(210);
         livesText.setLayoutY(550);
         
-        // initialized the second count
+        // initialized the second count for snooze
         snoozeTime.setStyle("-fx-font-size: 35;");
         snoozeTime.setFill(javafx.scene.paint.Color.YELLOW);
         snoozeTime.setLayoutX(20);
@@ -180,13 +187,15 @@ public class Defines {
 
 	}
 	
+	/**
+     * This is a method to get the filepath of something in the resources/images folder.
+     * It is used within the Defines class to initialize the images of the components
+     * 
+     * @param filepath The name of the image as it is stored in the resources/images folder
+     * @return the full filepath path of the image  
+     */
     public String pathImage(String filepath) {
     	String fullpath = getClass().getResource(IMAGE_DIR+filepath+".png").toExternalForm();
     	return fullpath;
-    }
-	
-	public Image resizeImage(String filepath, int width, int height) {
-    	IMAGE.put(filepath, new Image(pathImage(filepath), width, height, false, false));
-    	return IMAGE.get(filepath);
     }	
 }
