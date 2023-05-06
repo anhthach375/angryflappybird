@@ -23,11 +23,16 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-import javafx.scene.text.Text;
+//import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
-//The Application layer
+
+/**
+ * This class is contains the main method of the game, it runs the angryflappybird game
+ * It creates the actual application, scene, 
+ *
+ */
 public class AngryFlappyBird extends Application {
 	
 	private Defines DEF = new Defines();
@@ -47,7 +52,6 @@ public class AngryFlappyBird extends Application {
     private ArrayList<Sprite> breads;
     private ArrayList<Sprite> cactuses;
     private ArrayList<Sprite> clouds;
-    private Text scoreText;
     private int totalScore;
     private int livesLeft = 3;
     private boolean isSnoozed = false;
@@ -57,7 +61,7 @@ public class AngryFlappyBird extends Application {
     private double scene_velocity;
     private double bread_velocity;
     
-    
+    Random ran = new Random();
 
     // game flags
     private boolean CLICKED, GAME_START, GAME_OVER, HIT_PIPE_OR_PIG;
@@ -67,6 +71,9 @@ public class AngryFlappyBird extends Application {
     private VBox gameControl;	 // the right half of the GUI (control)
     private GraphicsContext gc;		
     
+	/**
+	 * @param args
+	 */
 	// the mandatory main method 
     public static void main(String[] args) {
         launch(args);
@@ -193,7 +200,6 @@ public class AngryFlappyBird extends Application {
     	kiki.render(gc);
         
         // initialize pipeUp  
-        Random ran = new Random();
         Sprite pipeUpCopy = new Sprite(0, 0, DEF.IMAGE.get("pipeflap2"));
         for (int i = 0; i < DEF.PIPE_COUNT; i++) {
             int PIPEUP_POS_X = ran.nextInt((i+1)*250, (i+2)*250);
@@ -297,7 +303,7 @@ public class AngryFlappyBird extends Application {
                      isSnoozed = false;
                      gameScene.getChildren().remove(DEF.snoozeTime);
                  }
-               }    	     
+             }    	     
     	 }    	 
     	 // step1: update floor
     	 private void moveFloor() {            
@@ -310,7 +316,7 @@ public class AngryFlappyBird extends Application {
                  floors.get(i).render(gc);
                  floors.get(i).update(DEF.SCENE_SHIFT_TIME);
              }
-          }   	
+         }   	
 
     	 // step2: update kiki
     	 private void moveKiki() {  	
@@ -348,13 +354,12 @@ public class AngryFlappyBird extends Application {
     	 }  
     	   	
     	 // step 3: update pipes and randomize cactus
-    	 private void movePipesandCactus() {   
-             Random ran = new Random(); 
-             int ranValue = ran.nextInt(10);
+    	 private void movePipesandCactus() {  
              for(int i=0; i<pipeDowns.size(); i++) {   
                  if (pipeDowns.get(i).getPositionX() <= -DEF.PIPE_WIDTH) { 
+                     int ranValue = ran.nextInt(10);
                      double nextX = pipeDowns.get((i+1)%DEF.PIPE_COUNT).getPositionX() + 300;
-                     double nextY_down = ran.nextInt(420, 450);
+                     double nextY_down = ran.nextInt(400, 460);
                      double nextY_up = nextY_down - 480;
                      pipeDowns.get(i).setPositionXY(nextX, nextY_down);
                      pipeDowns.get(i).setNotPassed(pipeDowns.get(i)); 
@@ -372,8 +377,10 @@ public class AngryFlappyBird extends Application {
                          cactuses.get(i).setImage(DEF.IMAGE.get("cactus"));
                          cactuses.get(i).setNotPassed(cactuses.get(i));  
                      }
-                     else if (ranValue % 3 == 0) {
+                     else if (ranValue % 3 == 0)  {
                          clouds.get(i).setPositionXY(nextX, nextY_down - 80);
+                         clouds.get(i).setImage(DEF.IMAGE.get("cloud"));
+                         clouds.get(i).setNotPassed(clouds.get(i));
                      }
                          
                  }
@@ -392,7 +399,6 @@ public class AngryFlappyBird extends Application {
     	 //  step 4: update bread
     	 private void moveBread() {             
              for(int i=0; i<breads.size(); i++) {
-                 Random ran = new Random();
                  double waitDistance = ran.nextInt(200,2000);
                  if (breads.get(i).getPositionX() <= -waitDistance && !HIT_PIPE_OR_PIG && !isSnoozed) {
                      //get X position from farthest pipe
@@ -543,8 +549,7 @@ public class AngryFlappyBird extends Application {
     	        cloud.setVelocity(0, 0);
     	    }    	     
     	}
-      	     	
-    	// show 
+      	     	 
     	private void passPipeEffect() {
     	    if (!isSnoozed) {
     	        for (Sprite pipe : pipeUps) {
