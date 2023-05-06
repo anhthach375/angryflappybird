@@ -456,6 +456,7 @@ public class AngryFlappyBird extends Application {
                   for (int i=0; i<breads.size(); i++) {
                       if (!HIT_PIPE_OR_PIG) {
                           if (cactus.intersectsSprite(breads.get(i))) {
+                              cactus.setVisible(false);
                               totalScore = Math.max(0, totalScore - 3 );
                               SCORE.updateScoreText(DEF.scoreText, totalScore);
                               moveBreadNow(i);
@@ -476,6 +477,7 @@ public class AngryFlappyBird extends Application {
                    for (int i=0; i<breads.size(); i++) {
                        if (!HIT_PIPE_OR_PIG) {
                            if (cloud.intersectsSprite(breads.get(i))) {
+                               cloud.setVisible(false);
                                totalScore = Math.max(0, totalScore - 3 );
                                SCORE.updateScoreText(DEF.scoreText, totalScore);
                                moveBreadNow(i);
