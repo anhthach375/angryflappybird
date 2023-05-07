@@ -414,16 +414,20 @@ public class AngryFlappyBird extends Application {
                      }
                      // else randomize appearance of cactus
                      else if (ranValue % 2 == 0 | ranValue % 5 == 0) {
+                         
                          cactuses.get(i).setPositionXY(nextX, nextY_down - 80);
                          cactuses.get(i).setImage(DEF.IMAGE.get("cactus"));
                          cactuses.get(i).setNotPassed(cactuses.get(i));  
+                         cactuses.get(i).setVisible(true);
                      }
-                  // else randomize appearance of cloud
+                     // else randomize appearance of cloud
                      else if (ranValue % 3 == 0)  {
                          clouds.get(i).setPositionXY(nextX, nextY_down - 80);
                          clouds.get(i).setImage(DEF.IMAGE.get("cloud"));
                          clouds.get(i).setNotPassed(clouds.get(i));
+                         clouds.get(i).setVisible(true);
                      }
+                     
                          
                  }
                  // render them all
@@ -497,7 +501,8 @@ public class AngryFlappyBird extends Application {
                   if (kiki.intersectsSprite(pipe)) {
                       HIT_PIPE_OR_PIG = true;
                    }            
-               }           
+               } 
+              // for bread and kiki
               for (Sprite bread : breads) {
                   if (kiki.intersectsSprite(bread)) {
                       if (!HIT_PIPE_OR_PIG) {
@@ -508,9 +513,37 @@ public class AngryFlappyBird extends Application {
                       HIT_PIPE_OR_PIG = true;
                   }
               }
-                  
+              //for bread and cactus
+               for (Sprite bread : breads) {
+                  for (int i=0; i<cactuses.size(); i++) {
+                      if (!HIT_PIPE_OR_PIG) {
+                          if (cactuses.get(i).intersectsSprite(bread) && !cactuses.get(i).isPassed()) {
+                              cactuses.get(i).setVisible(false);
+                              cactuses.get(i).setPassed(cactuses.get(i));
+                              totalScore = Math.max(0, totalScore - 3 );
+                              //totalScore =  totalScore - 3 ;
+                              System.out.print(totalScore);
+                              SCORE.updateScoreText(DEF.scoreText, totalScore);
+                              
+                          }
+                      }
+                  }
+               }
+               // for bread and cloud
+               for (Sprite bread : breads) {
+                  for (int i=0; i<clouds.size(); i++) {
+                    if (!HIT_PIPE_OR_PIG) {
+                        if (clouds.get(i).intersectsSprite(bread) && !clouds.get(i).isPassed()) {
+                            clouds.get(i).setVisible(false);
+                            clouds.get(i).setPassed(clouds.get(i));
+                            totalScore = Math.max(0, totalScore - 3 );
+                            SCORE.updateScoreText(DEF.scoreText, totalScore);
+                        }
+                    }
+                }
+              }
+                //for cactuses and kiki  
                for (Sprite cactus : cactuses) {
-                   //kiki collision
                   if (kiki.intersectsSprite(cactus) && !cactus.isPassed()) {
                       cactus.setVisible(false);
                       SCORE.updateScoreText(DEF.scoreText, totalScore++);
@@ -518,19 +551,10 @@ public class AngryFlappyBird extends Application {
                       sound.play("point.mp3");
                       break;
                   }
-                  // bread collision
-                  for (int i=0; i<breads.size(); i++) {
-                      if (!HIT_PIPE_OR_PIG) {
-                          if (cactus.intersectsSprite(breads.get(i))) {
-                              cactus.setVisible(false);
-                              totalScore = Math.max(0, totalScore - 3 );
-                              SCORE.updateScoreText(DEF.scoreText, totalScore);
-                          }
-                      }
-                  }
+                  
              }
+               // for cloud and kiki
                for (Sprite cloud : clouds) {
-                   //kiki collision
                    if (kiki.intersectsSprite(cloud) && !cloud.isPassed()) {
                        if (!HIT_PIPE_OR_PIG) {
                            cloud.setVisible(false);                  
@@ -540,16 +564,6 @@ public class AngryFlappyBird extends Application {
                            snoozingStart = System.nanoTime();
                        }
                    } 
-                   //bread collision
-                   for (int i=0; i<breads.size(); i++) {
-                       if (!HIT_PIPE_OR_PIG) {
-                           if (cloud.intersectsSprite(breads.get(i))) {
-                               cloud.setVisible(false);
-                               totalScore = Math.max(0, totalScore - 3 );
-                               SCORE.updateScoreText(DEF.scoreText, totalScore);
-                           }
-                       }
-                   }
                }           
                // if bird hits bread or pipe, bounce and wait to hit floor
                if(HIT_PIPE_OR_PIG) {
