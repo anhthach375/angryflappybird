@@ -15,6 +15,7 @@ import javafx.scene.text.Text;
  * This class contains all of the coefficients related to the game app, scene, UI, and components. 
  * It can initialize all the components and their change images
  *
+ * @author Willow Kelleigh and Anh Thach
  */
 public class Defines { 
     

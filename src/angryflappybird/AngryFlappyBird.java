@@ -23,18 +23,20 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-//import javafx.scene.text.Text;
+import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 
 
 /**
  * This class is contains the main method of the game, it runs the angryflappybird game
- * It creates the actual application, scene, 
- *
+ * It creates the actual application, scene, and game elements.
+ * Moves and updates game components as it is played.
+ * @author Willow Kelleigh and Anh Thach
  */
 public class AngryFlappyBird extends Application {
 	
+    // creates new instances of classes needed for game
 	private Defines DEF = new Defines();
     private Sound sound = new Sound();
     private Score SCORE = new Score();
@@ -72,15 +74,17 @@ public class AngryFlappyBird extends Application {
     private GraphicsContext gc;		
     
 	/**
+	 * the mandatory main method
 	 * @param args
-	 */
-	// the mandatory main method 
+	 */ 
     public static void main(String[] args) {
         launch(args);
     }
        
-    // the start method sets the Stage layer
     @Override
+    /** 
+     * sets the stage layer
+     */
     public void start(Stage primaryStage) throws Exception {
     	
     	// initialize scene graphs and UIs
@@ -102,13 +106,18 @@ public class AngryFlappyBird extends Application {
         primaryStage.show();
     }
     
-    // the getContent method sets the Scene layer
+    /** 
+     * sets the Scene layer
+     */
     private void resetGameControl() {      
         DEF.startButton.setOnMouseClicked(this::mouseClickHandler);
         gameControl = new VBox(25);
         gameControl.getChildren().addAll(DEF.startButton,DEF.listView,DEF.cactusBox,DEF.snoozeCloudBox,DEF.breadBox); 
     }
     
+    /** 
+     * Handles the clicking of the button based on if the game is over and if it is during bounceback
+     */
     private void mouseClickHandler(MouseEvent e) {
         if (GAME_OVER) {
             resetGameScene(false);
@@ -122,7 +131,10 @@ public class AngryFlappyBird extends Application {
         	sound.play("wing.wav");
         }
     }
-    
+    /** 
+     * Resets all the elements of the game, the scene and all the sprites.
+     * If first time, create the canvases for the game.
+     */
     private void resetGameScene(boolean firstEntry) {	
     	// reset variables        
         CLICKED = false;
@@ -136,8 +148,9 @@ public class AngryFlappyBird extends Application {
         breads = new ArrayList<>();
         cactuses = new ArrayList<>();
         clouds = new ArrayList<>();
+        // set difficulty as chosen by player
         difficulty = Math.max(DEF.listView.getSelectionModel().getSelectedIndex(),0);
-        
+        // set elements of the game based on difficulty
         if(difficulty==0) {
             scene_velocity = DEF.SCENE_SHIFT_INCR_EASY;
             bread_velocity = DEF.BREAD_VELOCITY_EASY;
@@ -272,10 +285,19 @@ public class AngryFlappyBird extends Application {
 
     }
     
-    //timer stuff
+    /**
+     * The MyTimer class is an extension of AnimationTimer. 
+     * It keeps track of the time to manage the elements of the game.
+     *
+     */
     class MyTimer extends AnimationTimer { 	
     	int counter = 0;  	
     	 @Override
+    	 /** 
+          * Moves elements of the game and keeps track of elapsed time.
+          * If there is a collision, appropriate changes are made.
+          * If isSnoozed, element with snooze timer appears on screen.
+          */
     	 public void handle(long now) {   		 
     		 // time keeping
     	     elapsedTime = now - startTime;
@@ -284,17 +306,16 @@ public class AngryFlappyBird extends Application {
     	     // clear current scene
     	     gc.clearRect(0, 0, DEF.SCENE_WIDTH, DEF.SCENE_HEIGHT);   	     
     	     
+    	     // if game is going, move elements and check for extras
     	     if (GAME_START) {
-        	     // step1: update non-player objects
         	     moveFloor();
-        	     movePipesandCactus();
+        	     movePipesCactusCloud();
                  moveBread();
-                 // step2: update kiki
-    	    	 moveKiki();   
-    	    	 // step3: check for extras
+    	    	 moveKiki();
     	    	 checkCollision();
     	    	 passPipeEffect();	 	    	  	    	   
-    	     }      	     
+    	     }
+    	     // if isSnoozed, show timer on screen
     	     if (isSnoozed) {
                  double snoozeTime = (System.nanoTime() - snoozingStart)*DEF.NANOSEC_TO_SEC;
                  snoozeRemaining = (7-snoozeTime);
@@ -305,22 +326,33 @@ public class AngryFlappyBird extends Application {
                  }
              }    	     
     	 }    	 
-    	 // step1: update floor
+    	 /** 
+          * Helper function for handle() moves floor.
+          */
     	 private void moveFloor() {            
              for(int i=0; i<DEF.FLOOR_COUNT; i++) {
+                 // if floor is offscreen, move back around
                  if (floors.get(i).getPositionX() <= -DEF.FLOOR_WIDTH) {
                      double nextX = floors.get((i+1)%DEF.FLOOR_COUNT).getPositionX() + DEF.FLOOR_WIDTH;
                      double nextY = DEF.SCENE_HEIGHT - DEF.FLOOR_HEIGHT;
                      floors.get(i).setPositionXY(nextX, nextY);
                  }
+                 //render floors
                  floors.get(i).render(gc);
                  floors.get(i).update(DEF.SCENE_SHIFT_TIME);
              }
          }   	
 
-    	 // step2: update kiki
+    	 /** 
+          * Helper function for handle() moves kiki, cycling through the different images as she moves.
+          * If isSnoozed, moves on her own.
+          * If button has been clicked recently, kiki moves up.
+          * If button hasn't been clicked in a little while, she falls.
+          * Kiki cannot be moved by player during bounceback.
+          */
     	 private void moveKiki() {  	
-			long diffTime = System.nanoTime() - clickTime;			
+			long diffTime = System.nanoTime() - clickTime;
+			// if isSnoozed, Kiki moves on her own for 6 seconds
 			if (isSnoozed) {	            
 			    kiki.setPositionXY(80, 150);
 			    kiki.setImage(DEF.IMAGE.get("kiki01"));
@@ -335,6 +367,7 @@ public class AngryFlappyBird extends Application {
                   );
                 snoozeTimeline.play();              
 			}
+			// else if button has been clicked recently, kiki moves up
 			else if (!CLICKED && diffTime <= DEF.KIKI_DROP_TIME) {		
 
 				int imageIndex = Math.floorDiv(counter++, DEF.KIKI_IMG_PERIOD);
@@ -342,7 +375,7 @@ public class AngryFlappyBird extends Application {
 				kiki.setImage(DEF.IMAGE.get("kiki0"+String.valueOf(imageIndex+1)));
 				kiki.setVelocity(0, DEF.KIKI_FLY_VEL);
 			}
-			// Kiki drops after a period of time without button click if haven't hit pipe or pig
+			// else if haven't hit pipe or pig, Kiki drops after a period of time without button click 
 			else if(!HIT_PIPE_OR_PIG){
 			    kiki.setVelocity(0, DEF.KIKI_DROP_VEL); 
 			    CLICKED = false;
@@ -352,11 +385,17 @@ public class AngryFlappyBird extends Application {
 			kiki.update(elapsedTime * DEF.NANOSEC_TO_SEC);
 			kiki.render(gc);
     	 }  
-    	   	
-    	 // step 3: update pipes and randomize cactus
-    	 private void movePipesandCactus() {  
+    	 
+    	 /** 
+          * Helper function for handle() moves pipes and bonus objects after they go off screen.
+          * Randomizes appearances of cactuses or clouds every time a downpipe moves.
+          * If isSnoozed, moved farther away based on speed of the scene.
+          */
+    	 private void movePipesCactusCloud() {  
              for(int i=0; i<pipeDowns.size(); i++) {   
+                 // if pipe is offscreen
                  if (pipeDowns.get(i).getPositionX() <= -DEF.PIPE_WIDTH) { 
+                     // set new positions for pipes 
                      int ranValue = ran.nextInt(10);
                      double nextX = pipeDowns.get((i+1)%DEF.PIPE_COUNT).getPositionX() + 300;
                      double nextY_down = ran.nextInt(400, 460);
@@ -365,6 +404,7 @@ public class AngryFlappyBird extends Application {
                      pipeDowns.get(i).setNotPassed(pipeDowns.get(i)); 
                      pipeUps.get(i).setPositionXY(nextX, nextY_up);
                      pipeUps.get(i).setNotPassed(pipeUps.get(i));
+                     // if snoozed, move them farther away
                      if (isSnoozed) {
                          double snoozeX = 1000*(scene_velocity/DEF.SCENE_SHIFT_INCR_MED);
                          pipeDowns.get(i).setPositionXY(snoozeX, pipeDowns.get(i).getPositionY());
@@ -372,11 +412,13 @@ public class AngryFlappyBird extends Application {
                          cactuses.get(i).setPositionXY(snoozeX, cactuses.get(i).getPositionY());
                          clouds.get(i).setPositionXY(snoozeX, clouds.get(i).getPositionY());
                      }
+                     // else randomize appearance of cactus
                      else if (ranValue % 2 == 0 | ranValue % 5 == 0) {
                          cactuses.get(i).setPositionXY(nextX, nextY_down - 80);
                          cactuses.get(i).setImage(DEF.IMAGE.get("cactus"));
                          cactuses.get(i).setNotPassed(cactuses.get(i));  
                      }
+                  // else randomize appearance of cloud
                      else if (ranValue % 3 == 0)  {
                          clouds.get(i).setPositionXY(nextX, nextY_down - 80);
                          clouds.get(i).setImage(DEF.IMAGE.get("cloud"));
@@ -384,6 +426,7 @@ public class AngryFlappyBird extends Application {
                      }
                          
                  }
+                 // render them all
                  pipeDowns.get(i).render(gc);
                  pipeDowns.get(i).update(DEF.SCENE_SHIFT_TIME);
                  pipeUps.get(i).render(gc);
@@ -396,32 +439,47 @@ public class AngryFlappyBird extends Application {
 
          }
     	 
-    	 //  step 4: update bread
+    	 /** 
+          * Helper function for handle() moves bread to another pipe after it goes off screen.
+          * Waits for a randomized interval of time before doing so.
+          * Doesn't move if HIT_PIPE_OR_PIG or isSnoozed.
+          */
     	 private void moveBread() {             
              for(int i=0; i<breads.size(); i++) {
                  double waitDistance = ran.nextInt(200,2000);
+                 // if bread is offscreen and not HIT_PIPE_OR_PIG or isSnoozed
                  if (breads.get(i).getPositionX() <= -waitDistance && !HIT_PIPE_OR_PIG && !isSnoozed) {
-                     //get X position from farthest pipe
+                     //get position from farthest pipe
                      double nextX = 0;
                      for (int j=0; j<pipeUps.size(); j++){
                          if (pipeUps.get(j).getPositionX()>nextX) {
                              nextX = pipeUps.get(j).getPositionX();
                          }
                      }
+                     // set new position
                      double nextY = 0;
                      breads.get(i).setPositionXY(nextX, nextY);
                      breads.get(i).setNotPassed(breads.get(i));                            
                  }
+                 // render the bread
                  breads.get(i).render(gc);
                  breads.get(i).update(DEF.SCENE_SHIFT_TIME);      
               }                  
          }	 
-         
+    	 /**
+    	     * Helper function for handle().
+    	     * Checks to see if there was a collision between kiki and any of the elements of the game.
+    	     * and updates the game and imposes consequences.
+    	     * If isSnoozed, does not check for collisions for anything .
+    	     * If kiki hits pipe or pig, bounces back and waits to hit floor.
+    	     * If hits floor or pig life is taken, if hit pig score is set to 0.
+    	     * Cactuses and clouds are checked for intersections with both Kiki and bread.
+    	     */
     	 public void checkCollision() {   	
     	     ImageView gameoverImage = DEF.IMVIEW.get("gameover");
              gameoverImage.setX(DEF.SCENE_WIDTH / 2 - gameoverImage.getBoundsInLocal().getWidth() / 2);
              gameoverImage.setY(DEF.SCENE_HEIGHT / 3);
-    		  // check collision                  
+    		  // check collision between kiki and non-bonus elements unless snoozed                
     	    if (!isSnoozed) { 
     	      for (Sprite floor: floors) {
                   GAME_OVER = GAME_OVER || kiki.intersectsSprite(floor);
@@ -452,6 +510,7 @@ public class AngryFlappyBird extends Application {
               }
                   
                for (Sprite cactus : cactuses) {
+                   //kiki collision
                   if (kiki.intersectsSprite(cactus) && !cactus.isPassed()) {
                       cactus.setVisible(false);
                       SCORE.updateScoreText(DEF.scoreText, totalScore++);
@@ -459,6 +518,7 @@ public class AngryFlappyBird extends Application {
                       sound.play("point.mp3");
                       break;
                   }
+                  // bread collision
                   for (int i=0; i<breads.size(); i++) {
                       if (!HIT_PIPE_OR_PIG) {
                           if (cactus.intersectsSprite(breads.get(i))) {
@@ -470,6 +530,7 @@ public class AngryFlappyBird extends Application {
                   }
              }
                for (Sprite cloud : clouds) {
+                   //kiki collision
                    if (kiki.intersectsSprite(cloud) && !cloud.isPassed()) {
                        if (!HIT_PIPE_OR_PIG) {
                            cloud.setVisible(false);                  
@@ -479,6 +540,7 @@ public class AngryFlappyBird extends Application {
                            snoozingStart = System.nanoTime();
                        }
                    } 
+                   //bread collision
                    for (int i=0; i<breads.size(); i++) {
                        if (!HIT_PIPE_OR_PIG) {
                            if (cloud.intersectsSprite(breads.get(i))) {
@@ -489,31 +551,34 @@ public class AngryFlappyBird extends Application {
                        }
                    }
                }           
-             // if bird hits bread or pipe, bounce and wait to hit floor
-             if(HIT_PIPE_OR_PIG) {
-                 kiki.setVelocity(DEF.KIKI_FLY_BACK_VEL, DEF.KIKI_DROP_VEL); 
-                 stopMotion();
-             }
-           }
-      // end the game when kiki hit stuff
-        if (GAME_OVER) {
-          showHitEffect(); 
-          stopMotion();
-          gameScene.getChildren().add(gameoverImage); 
-          DEF.startButton.setOnAction(event -> {
-              gameScene.getChildren().remove(gameoverImage);
-          });
-          timer.stop();
-        }
-
-        if (livesLeft <= 0) {
-            totalScore = 0;
-            SCORE.resetScoreText(DEF.scoreText);
-            livesLeft = 3;
-            SCORE.updateLivesText(DEF.livesText, livesLeft);
-        }
-  }  	 
-    	 
+               // if bird hits bread or pipe, bounce and wait to hit floor
+               if(HIT_PIPE_OR_PIG) {
+                   kiki.setVelocity(DEF.KIKI_FLY_BACK_VEL, DEF.KIKI_DROP_VEL); 
+                   stopMotion();
+               }
+           } // end of if not snoozed
+    	    
+            // end the game when kiki hit stuff
+            if (GAME_OVER) {
+              showHitEffect(); 
+              stopMotion();
+              gameScene.getChildren().add(gameoverImage); 
+              DEF.startButton.setOnAction(event -> {
+                  gameScene.getChildren().remove(gameoverImage);
+              });
+              timer.stop();
+            }
+    
+            if (livesLeft <= 0) {
+                totalScore = 0;
+                SCORE.resetScoreText(DEF.scoreText);
+                livesLeft = 3;
+                SCORE.updateLivesText(DEF.livesText, livesLeft);
+            }
+        }  	 
+    	 /** 
+    	  * Helper function for checkCollision() that stops motion of game elements except kiki.
+    	  */
     	 private void stopMotion() {
     	    for (Sprite floor: floors) {
                 floor.setVelocity(0, 0);
@@ -534,7 +599,11 @@ public class AngryFlappyBird extends Application {
     	        cloud.setVelocity(0, 0);
     	    }    	     
     	}
-      	     	 
+    	 
+    	 /** 
+          * Helper function for handle() updates game when kiki passes through a set of pipes 
+          * successfully.
+          */     	 
     	private void passPipeEffect() {
     	    if (!isSnoozed) {
     	        for (Sprite pipe : pipeUps) {
@@ -546,7 +615,10 @@ public class AngryFlappyBird extends Application {
                     }
                 }
     	    }
-    	}    	 
+    	}   
+    	/** 
+         * Helper function for checkCollision() visually shows when the game is over.
+         */
         private void showHitEffect() {
 	        ParallelTransition parallelTransition = new ParallelTransition();
 	        FadeTransition fadeTransition = new FadeTransition(Duration.seconds(DEF.TRANSITION_TIME), gameScene);
